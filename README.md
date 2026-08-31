@@ -14,7 +14,8 @@
   <a href="https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/download/v1.6.5/LunaaAdaptiveAod-v1.6.5-signed.apk"><b>📥 Download Latest APK (v1.6.5)</b></a> •
   <a href="#-requirements"><b>📋 Requirements</b></a> •
   <a href="#-how-to-install--use"><b>🚀 How to Install &amp; Use</b></a> •
-  <a href="#-presets--calibration"><b>🎯 Presets</b></a> •
+  <a href="#-presets--brightness-modes"><b>🎯 Presets &amp; Modes</b></a> •
+  <a href="#-extra-bright-hardware-aod-hbm"><b>🔥 Extra Bright (HBM)</b></a> •
   <a href="#-architecture--how-it-works"><b>🛠️ Architecture</b></a> •
   <a href="#-русскоязычное-руководство"><b>🇷🇺 Русский гайд</b></a>
 </p>
@@ -55,22 +56,52 @@
 ## 🌟 Highlights & Key Features
 
 - 🌓 **Truly Adaptive AOD Brightness**: Real-time ambient light sensor curve matching human perceptual brightness (Stevens' power law). Never too dim in room light, never blinding in a pitch-black room.
-- ☀️ **Hardware AOD-HBM (Extra Bright)**: Direct panel hardware latching (~800 nits) under intense outdoor sunlight (>1500 lux).
+- 🔥 **Hardware AOD-HBM (Extra Bright)**: Direct panel hardware latching (~800 nits) under intense outdoor sunlight (>1500 lux) or on demand in manual mode.
 - 🔓 **Full Optical UDFPS Compatibility**: Instant background logical rearm of `/sys/kernel/oplus_display/notify_fppress` so the optical in-display fingerprint sensor never gets blocked or frozen while HBM is active.
 - 🛡️ **Axion OS & Multi-ROM Safety**: Hardware capability probe (`HbmCapabilityProbe`) with graceful fallback to standard AOSP ambient doze controls on non-Oplus firmware.
 - 🔄 **In-App GitHub Auto-Updater**: Real-time release check directly from GitHub with 1-click seamless silent update via Root (KernelSU / Magisk) or standard Android package installer.
 
 ---
 
-## 🎯 Presets & Calibration
+## 🎯 Presets & Brightness Modes
 
 <p align="center">
-  <img src="assets/readme/presets.svg" alt="Lunaa Adaptive AOD Presets Breakdown" width="100%" />
+  <img src="assets/readme/presets.svg" alt="Lunaa Adaptive AOD Presets & Extra Bright Mode" width="100%" />
 </p>
 
-1. **🌙 DIM (Night Clock)**: `20% – 40%` (~15–35 nits) — soft, zero-glare, ideal for dark rooms and bedside tables.
-2. **⚡ BALANCED (Everyday Recommended)**: `50% – 76%` (~45–135 nits) — 50% comfortable floor in darkness scaling up to 76% in standard indoor lighting.
-3. **☀️ BRIGHT (Daylight & Outdoors)**: `100%` (215–380 nits + ~800 nits HBM on sunlight) — maximum clarity under harsh outdoor lighting.
+### 1. Automatic Mode (3 Calibrated Presets)
+- **🌙 DIM (Night Clock)**: `20% – 40%` (~15–35 nits) — soft, zero-glare, ideal for dark rooms and bedside tables.
+- **⚡ BALANCED (Everyday Recommended)**: `50% – 76%` (~45–135 nits, up to 100% on 20,000 lux) — 50% comfortable floor in darkness scaling smoothly in indoor lighting.
+- **☀️ BRIGHT (Daylight Mode)**: `100%` (215–380 nits) — maximum daytime visibility on standard AOD curve; automatically activates Extra Bright HBM outdoors.
+
+### 2. Manual Mode (Fixed 3-Step Slider)
+- Allows setting fixed brightness levels without ambient sensor adaptation:
+  - **Dim**: Default 10% (customizable in Advanced Settings).
+  - **Balanced**: Default 50% (customizable in Advanced Settings).
+  - **Bright**: Default 100% (customizable in Advanced Settings, supports Extra Bright toggle).
+
+---
+
+## 🔥 Extra Bright (Hardware AOD-HBM)
+
+**Extra Bright** is a specialized hardware-level High Brightness Mode engineered specifically for AMOLED screens to make the Always-On Display crystal clear under blinding direct sunlight.
+
+### How It Works:
+- Directly communicates with the kernel display driver (`/sys/kernel/oplus_display/notify_fppress`) via a secure root bridge.
+- Bypasses standard AOSP doze brightness limits and forces the AMOLED panel into peak hardware HBM (**~800 nits**).
+
+### How It Activates:
+1. **Automatic Mode**: When using the **☀️ Bright** preset, Extra Bright automatically engages when the ambient sensor detects outdoor sunlight (**> 1,500 lux**), and turns off when moving indoors.
+2. **Manual Mode**: When Manual Brightness is set to **Level 3 (Bright)**, enabling the **Extra Bright** toggle forces hardware HBM for the entire AOD session.
+
+### Strength Levels:
+The Extra Bright slider supports 3 calibrated strength levels (customizable under Advanced Settings):
+- **Low**: `50%` HBM strength.
+- **Medium**: `75%` HBM strength.
+- **Max**: `100%` full panel HBM (~800 nits peak).
+
+### 🔓 Optical Fingerprint (UDFPS) Instant Recovery:
+On many custom ROMs, forcing HBM locks up the optical fingerprint scanner. Lunaa Adaptive AOD solves this by having the root daemon immediately perform a background logical reset (`notify_fppress = 0`) while preserving physical display latching. The optical fingerprint reader remains 100% responsive and unlocks instantly.
 
 ---
 
@@ -108,12 +139,17 @@ On Snapdragon 778G / Samsung AMOLED (AMS643YE01) panels:
 3. Перезагрузите устройство для применения хука.
 4. Откройте приложение, предоставьте Root-права при запросе, выберите профиль (**Balanced** или **Bright**) и нажмите **Save changes**.
 
-### 🌟 Основные возможности:
-1. **Адаптивная яркость AOD**: Экран блокировки плавно подстраивается под окружающее освещение благодаря датчику света.
-2. **Аппаратный Extra Bright (AOD-HBM)**: На ярком солнце дисплей переходит в режим пиковой яркости (~800 нит), обеспечивая отличную читаемость циферблата и уведомлений.
-3. **Работа оптического сканера отпечатка**: При включенном HBM сканер отпечатка не залипает и мгновенно разблокирует устройство.
-4. **Безопасность для других прошивок (Axion OS / AOSP)**: Модуль проверяет совместимость ядра и отключает вендорные вызовы при отсутствии нужных интерфейсов Oplus.
-5. **Встроенное автообновление с GitHub**: Проверка свежих релизов и установка обновлений прямо из настроек приложения.
+### 🌟 Основные режимы работы:
+1. **Автоматический режим**:
+   - **🌙 DIM**: `20% – 40%` (~15–35 нит) — мягкий ночной циферблат без ослепления.
+   - **⚡ BALANCED**: `50% – 76%` (~45–135 нит) — комфортный баланс для повседневного использования в помещении.
+   - **☀️ BRIGHT**: `100%` (215–380 нит) — высокая базовая яркость + автоматическое включение Extra Bright на солнце.
+2. **Ручной режим**: 3 фиксированных уровня яркости без привязки к датчику освещения.
+3. **🔥 Аппаратный Extra Bright (AOD-HBM)**:
+   - Включает пиковую аппаратную яркость дисплея (**~800 нит**) на открытом солнце (>1500 люкс) или вручную на 3 уровне.
+   - Имеет 3 уровня силы: **Low (50%)**, **Medium (75%)**, **Max (100%)**.
+   - **Разблокировка по отпечатку (UDFPS)**: При активном HBM сканер не залипает и мгновенно распознает палец.
+4. **Встроенное автообновление с GitHub**: Проверка обновлений и установка в 1 клик через Root прямо из приложения.
 
 ---
 
