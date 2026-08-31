@@ -14,6 +14,15 @@
 
 ---
 
+## 📋 Requirements
+
+- **Android Version**: Android 8.0 through Android 16 (API 26–36). Compatible with AOSP, LineageOS, crDroid, Axion OS, and vendor ROMs.
+- **Xposed Framework**: [LSPosed](https://github.com/mywalkb/LSPosed_mod) (Zygisk release) or Zygisk-Vector.
+- **Root Access**: [KernelSU](https://kernelsu.org/), [Magisk](https://github.com/topjohnwu/Magisk), or [APatch](https://github.com/bmax121/APatch) (required for Hardware Extra Bright HBM and 1-click silent updates).
+- **Target Hardware**: Designed for **Realme GT Master Edition** (`RMX3363` / `lunaa`, Snapdragon 778G, Samsung AMOLED `AMS643YE01`). Adaptive brightness curve works universally across all AMOLED devices.
+
+---
+
 ## 🌟 Highlights & Key Features
 
 - 🌓 **Truly Adaptive AOD Brightness**: Real-time ambient light sensor curve matching human perceptual brightness (Stevens' power law).
@@ -46,32 +55,30 @@ On Snapdragon 778G / Samsung AMOLED (AMS643YE01) panels:
 
 ## 📦 Installation & Setup
 
-1. **Prerequisites**:
-   - Android 8.0 through Android 16 (API 26–36).
-   - Root via **KernelSU**, **Magisk**, or **APatch**.
-   - **LSPosed** (or Zygisk-Vector) installed and activated.
-2. **Install Lunaa Adaptive AOD**:
-   - Download the latest signed APK from [Releases](https://github.com/github-lover-9999/LunaaAdaptiveAod/releases).
-   - In LSPosed Manager, enable the **Lunaa Adaptive AOD** module and ensure **System Framework / SystemUI** is checked in its scope.
-   - Reboot your device (recommended for initial LSPosed injection).
-3. **Configure**:
+1. **Install Module**:
+   - Download `LunaaAdaptiveAod-v1.6.5-signed.apk` from [Releases](https://github.com/github-lover-9999/LunaaAdaptiveAod/releases).
+   - In LSPosed Manager, enable **Lunaa Adaptive AOD** and check **System Framework / SystemUI** in its scope.
+   - Reboot device (recommended for initial LSPosed hook injection).
+2. **Configure**:
    - Open **Lunaa Adaptive AOD** from your app drawer.
-   - Grant Root access when prompted (for Extra Bright / Auto-Updater).
-   - Choose your preferred Preset (**Balanced** or **Bright**) and tap **Save changes**.
+   - Grant Root access when prompted.
+   - Select your preferred preset (**Balanced** or **Bright**) and tap **Save changes**.
 
 ---
 
 ## 🇷🇺 Русскоязычное руководство
 
-### Описание
-**Lunaa Adaptive AOD** — Xposed/LSPosed модуль с поддержкой Root для динамического управления яркостью Always-On Display на смартфонах Realme GT Master Edition (RMX3363 / lunaa) и других устройствах с AMOLED экранами.
+### Требования:
+- **Android**: Android 8.0 — Android 16 (AOSP, crDroid, Axion OS, LineageOS и др.).
+- **Xposed**: LSPosed или Zygisk-Vector с выбранным скоупом `SystemUI`.
+- **Root**: KernelSU, Magisk или APatch (нужен для HBM и тихих обновлений).
+- **Устройство**: Оптимизировано для Realme GT Master Edition (`RMX3363`), базовая адаптивная яркость работает на любых AMOLED экранах.
 
 ### Основные возможности:
-1. **Адаптивная яркость AOD**: Экран блокировки плавно подстраивается под окружающее освещение благодаря датчику света.
-2. **Аппаратный Extra Bright (AOD-HBM)**: На ярком солнце дисплей переходит в режим пиковой яркости (~800 нит), обеспечивая отличную видимость циферблата и уведомлений.
-3. **Работа оптического сканера отпечатка**: При включенном HBM сканер отпечатка не залипает и мгновенно разблокирует устройство.
-4. **Безопасность для других прошивок (Axion OS / AOSP)**: Модуль проверяет совместимость ядра и отключает вендорные вызовы при отсутствии нужных интерфейсов Oplus.
-5. **Встроенное автообновление с GitHub**: Проверка свежих релизов и установка обновлений прямо из настроек приложения.
+1. **Адаптивная яркость AOD**: Экран плавно подстраивается под окружающее освещение через датчик света.
+2. **Аппаратный Extra Bright (AOD-HBM)**: На ярком солнце дисплей переходит в режим пиковой яркости (~800 нит).
+3. **Работа оптического сканера отпечатка**: При включенном HBM сканер отпечатка не залипает и мгновенно разблокирует телефон.
+4. **Встроенное автообновление с GitHub**: Проверка обновлений и 1-click установка прямо из настроек приложения.
 
 ---
 
