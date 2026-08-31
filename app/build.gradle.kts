@@ -10,8 +10,8 @@ android {
         applicationId = "dev.lunaa.aod"
         minSdk = 26
         targetSdk = 36
-        versionCode = 16483
-        versionName = "1.6.4"
+        versionCode = 16500
+        versionName = "1.6.5"
     }
 
     buildTypes {

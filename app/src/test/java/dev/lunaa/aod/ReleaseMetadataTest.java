@@ -11,8 +11,8 @@ public class ReleaseMetadataTest {
         String buildScript = read("tools/build-windows.ps1");
         String readme = read("README.md");
 
-        assertTrue(gradle.contains("versionCode = 16483"));
-        assertTrue(gradle.contains("versionName = \"1.6.4\""));
+        assertTrue(gradle.contains("versionCode = 16500"));
+        assertTrue(gradle.contains("versionName = \"1.6.5\""));
         assertTrue(buildScript.contains("LunaaAdaptiveAod-v1.6.4m-build.apk"));
         assertTrue(readme.contains("Lunaa Adaptive AOD"));
     }

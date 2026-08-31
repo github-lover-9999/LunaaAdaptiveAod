@@ -798,21 +798,7 @@ public final class SettingsActivity extends Activity implements SensorEventListe
             int percent = draft.getManualLevelPercent(level);
             previewValue.setText(getString(
                     R.string.preview_manual_level, manualLevelName(level), percent));
-            if (level == BrightnessLevelConfig.MAX_LEVEL) {
-                extraPreviewValue.setVisibility(View.VISIBLE);
-                if (draft.isManualExtraBrightEnabled()) {
-                    extraPreviewValue.setText(getString(
-                            R.string.manual_extra_bright_active,
-                            extraLevelName(draft.getExtraBrightLevel()),
-                            draft.getExtraBrightPercent()));
-                    extraPreviewValue.setTextColor(SettingsUiTheme.COLOR_ACCENT);
-                } else {
-                    extraPreviewValue.setText("Extra Bright is off. Manual Bright stays at 100% normal AOD brightness.");
-                    extraPreviewValue.setTextColor(SettingsUiTheme.COLOR_MUTED);
-                }
-            } else {
-                extraPreviewValue.setVisibility(View.GONE);
-            }
+            if (extraPreviewValue != null) extraPreviewValue.setVisibility(View.GONE);
             warningValue.setText(percent >= 90
                     ? R.string.high_manual_brightness_warning
                     : R.string.empty);
@@ -836,31 +822,10 @@ public final class SettingsActivity extends Activity implements SensorEventListe
     }
 
     private void updateExtraBrightnessPreview(AodSettingsSnapshot draft) {
-        if (!draft.isAutomaticMode() || draft.getPreset() != AodPreset.BRIGHT) {
+        if (extraPreviewValue != null) {
             extraPreviewValue.setVisibility(View.GONE);
-            return;
         }
-
-        extraPreviewValue.setVisibility(View.VISIBLE);
-        if (automaticExtraBrightnessSwitch != null && !automaticExtraBrightnessSwitch.isChecked()) {
-            extraPreviewValue.setText("Extra Bright is off. Bright Daylight stays on the normal AOD brightness curve without HBM.");
-            extraPreviewValue.setTextColor(SettingsUiTheme.COLOR_MUTED);
-            return;
-        }
-        String strength = extraLevelName(draft.getExtraBrightLevel());
-        if (!Float.isNaN(currentLux) && currentLux >= ExtraBrightnessPolicy.ENABLE_LUX) {
-            extraPreviewValue.setText(getString(
-                    R.string.extra_bright_active_outdoors_level,
-                    strength,
-                    draft.getExtraBrightPercent()));
-            extraPreviewValue.setTextColor(SettingsUiTheme.COLOR_ACCENT);
-        } else {
-            extraPreviewValue.setText(getString(
-                    R.string.extra_bright_available_level,
-                    strength,
-                    draft.getExtraBrightPercent()));
-            extraPreviewValue.setTextColor(SettingsUiTheme.COLOR_MUTED);
-        }
+        if (Float.isNaN(ExtraBrightnessPolicy.ENABLE_LUX)) return;
     }
 
     private void updatePresetButtons() {
