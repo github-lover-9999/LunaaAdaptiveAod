@@ -130,7 +130,7 @@ public final class AppUpdater {
     private static String fetchJsonViaRoot(String urlString) {
         try {
             Process process = Runtime.getRuntime().exec(new String[]{
-                    "su", "-c", "curl -s -L -H 'User-Agent: LunaaAdaptiveAod-Updater' -H 'Accept: application/vnd.github.v3+json' \"" + urlString + "\""
+                    "su", "-c", "curl -s -L --connect-timeout 10 --max-time 25 -H 'User-Agent: LunaaAdaptiveAod-Updater' -H 'Accept: application/vnd.github.v3+json' \"" + urlString + "\""
             });
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
             StringBuilder sb = new StringBuilder();
@@ -324,7 +324,7 @@ public final class AppUpdater {
 
     private static boolean downloadViaRoot(String downloadUrl, File targetFile) {
         try {
-            String command = "curl -s -L -H 'User-Agent: LunaaAdaptiveAod-Updater' \"" + downloadUrl + "\" -o \"" + targetFile.getAbsolutePath() + "\" && chmod 644 \"" + targetFile.getAbsolutePath() + "\"";
+            String command = "curl -s -L --connect-timeout 10 --max-time 60 -H 'User-Agent: LunaaAdaptiveAod-Updater' \"" + downloadUrl + "\" -o \"" + targetFile.getAbsolutePath() + "\" && chmod 644 \"" + targetFile.getAbsolutePath() + "\"";
             Process process = Runtime.getRuntime().exec(new String[]{"su", "-c", command});
             int exit = process.waitFor();
             return exit == 0 && targetFile.exists() && targetFile.length() > 1000;
@@ -336,14 +336,59 @@ public final class AppUpdater {
         }
     }
 
+    public static boolean verifyDownloadedApk(Context context, File apkFile) {
+        if (context == null || apkFile == null || !apkFile.exists() || apkFile.length() < 1000) {
+            return false;
+        }
+        try {
+            android.content.pm.PackageManager pm = context.getPackageManager();
+            if (pm == null) return false;
+            android.content.pm.PackageInfo archiveInfo;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                archiveInfo = pm.getPackageArchiveInfo(apkFile.getAbsolutePath(), android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES);
+            } else {
+                archiveInfo = pm.getPackageArchiveInfo(apkFile.getAbsolutePath(), android.content.pm.PackageManager.GET_SIGNATURES);
+            }
+            if (archiveInfo == null || archiveInfo.packageName == null) {
+                return false;
+            }
+            if (!context.getPackageName().equals(archiveInfo.packageName)) {
+                Log.e(TAG, "Mismatched package name: " + archiveInfo.packageName + ", expected: " + context.getPackageName());
+                return false;
+            }
+
+            android.content.pm.PackageInfo currentInfo;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
+                currentInfo = pm.getPackageInfo(context.getPackageName(), android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES);
+                if (archiveInfo.signingInfo != null && currentInfo.signingInfo != null) {
+                    android.content.pm.Signature[] archiveSigs = archiveInfo.signingInfo.getApkContentsSigners();
+                    android.content.pm.Signature[] currentSigs = currentInfo.signingInfo.getApkContentsSigners();
+                    if (archiveSigs != null && currentSigs != null && archiveSigs.length > 0 && currentSigs.length > 0) {
+                        return archiveSigs[0].equals(currentSigs[0]);
+                    }
+                }
+            } else {
+                currentInfo = pm.getPackageInfo(context.getPackageName(), android.content.pm.PackageManager.GET_SIGNATURES);
+                if (archiveInfo.signatures != null && currentInfo.signatures != null && archiveInfo.signatures.length > 0 && currentInfo.signatures.length > 0) {
+                    return archiveInfo.signatures[0].equals(currentInfo.signatures[0]);
+                }
+            }
+            return true;
+        } catch (Throwable t) {
+            Log.e(TAG, "Failed to verify downloaded APK", t);
+            return false;
+        }
+    }
+
     public static boolean installApkWithRoot(Context context, File apkFile) {
         if (apkFile == null || !apkFile.exists()) return false;
+        if (!verifyDownloadedApk(context, apkFile)) {
+            Log.e(TAG, "Downloaded APK verification failed; rejecting root install");
+            return false;
+        }
         try {
             String apkPath = apkFile.getAbsolutePath();
-            String command = "pm install -r \"" + apkPath + "\" && "
-                    + "APK_PATH=$(pm path dev.lunaa.aod | head -n 1 | cut -d: -f2) && "
-                    + "sqlite3 /data/adb/lspd/config/modules_config.db \"UPDATE modules SET apk_path='$APK_PATH' WHERE module_pkg_name='dev.lunaa.aod';\" && "
-                    + "killall com.android.systemui";
+            String command = "pm install -r \"" + apkPath + "\" && (killall com.android.systemui || true)";
 
             Process process = Runtime.getRuntime().exec(new String[]{"su", "-c", command});
             int exit = process.waitFor();

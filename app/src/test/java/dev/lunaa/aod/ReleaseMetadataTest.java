@@ -45,6 +45,16 @@ public class ReleaseMetadataTest {
         assertTrue(qa.contains("controller attached source=runtime-fields"));
     }
 
+    @Test
+    public void licenseAndGitignoreAreConfigured() throws Exception {
+        String license = read("LICENSE");
+        String gitignore = read(".gitignore");
+
+        assertTrue(license.contains("GNU GENERAL PUBLIC LICENSE"));
+        assertTrue(license.contains("Version 3"));
+        assertTrue(gitignore.contains("*.keystore"));
+    }
+
     private static String read(String path) throws Exception {
         return TestProjectFiles.read(path);
     }

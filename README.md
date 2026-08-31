@@ -92,7 +92,7 @@
 - Bypasses standard AOSP doze brightness limits and forces the AMOLED panel into peak hardware HBM (**~800 nits**).
 
 ### How It Activates:
-1. **Automatic Mode**: When using the **☀️ Bright** preset, Extra Bright automatically engages when the ambient sensor detects outdoor sunlight (**> 1,500 lux**), and turns off when moving indoors.
+1. **Automatic Mode**: When using the **☀️ Bright** preset, Extra Bright automatically engages when the ambient sensor detects outdoor sunlight (**> 1,500 lux**). To prevent display driver desynchronization and ensure 100% reliable optical fingerprint unlocking, HBM remains safely latched for the duration of the AOD session until the screen is unlocked.
 2. **Manual Mode**: When Manual Brightness is set to **Level 3 (Bright)**, enabling the **Extra Bright** toggle forces hardware HBM for the entire AOD session.
 
 ### Strength Levels:
@@ -194,7 +194,7 @@ On Snapdragon 778G / Samsung AMOLED (AMS643YE01) panels:
 - Обходит стандартные ограничения яркости AOSP Doze и переводит AMOLED-матрицу в аппаратный режим HBM (**~800 нит**).
 
 #### Условия активации:
-1. **В авторежиме**: При выбранном пресете **☀️ Bright** Extra Bright автоматически включается, когда датчик света фиксирует уличное солнце (**> 1500 люкс**), и выключается при возвращении в помещение.
+1. **В авторежиме**: При выбранном пресете **☀️ Bright** Extra Bright автоматически включается, когда датчик света фиксирует уличное солнце (**> 1500 люкс**). Чтобы исключить сбои в работе оптического сканера и гарантировать 100% стабильную разблокировку пальцем, режим HBM надежно фиксируется до конца текущей сессии AOD (до разблокировки экрана).
 2. **В ручном режиме**: При выборе 3 уровня яркости (Bright) включение тумблера **Extra Bright** активирует HBM на весь сеанс AOD.
 
 #### Уровни мощности:

@@ -43,4 +43,10 @@ public class AppUpdaterTest {
         assertEquals("https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/download/v1.6.5/LunaaAdaptiveAod-v1.6.5-signed.apk", info.apkDownloadUrl);
         assertTrue(info.hasUpdate);
     }
+
+    @Test
+    public void verifyDownloadedApkRejectsNullAndMissingFiles() {
+        assertFalse(AppUpdater.verifyDownloadedApk(null, null));
+        assertFalse(AppUpdater.verifyDownloadedApk(null, new java.io.File("non-existent.apk")));
+    }
 }

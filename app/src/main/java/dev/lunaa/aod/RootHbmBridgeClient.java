@@ -46,7 +46,10 @@ final class RootHbmBridgeClient {
         Intent intent = new Intent(action)
                 .setComponent(new ComponentName(TARGET_PACKAGE, TARGET_RECEIVER))
                 .addFlags(Intent.FLAG_RECEIVER_FOREGROUND);
-        BroadcastOptions options = BroadcastOptions.makeBasic().setShareIdentityEnabled(true);
+        BroadcastOptions options = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            options = BroadcastOptions.makeBasic().setShareIdentityEnabled(true);
+        }
         BroadcastReceiver resultReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context ignored, Intent resultIntent) {
@@ -58,16 +61,28 @@ final class RootHbmBridgeClient {
         };
 
         try {
-            context.sendOrderedBroadcast(
-                    intent,
-                    null,
-                    options.toBundle(),
-                    resultReceiver,
-                    handler,
-                    RESULT_FAILURE,
-                    "not-delivered",
-                    null
-            );
+            if (options != null) {
+                context.sendOrderedBroadcast(
+                        intent,
+                        null,
+                        options.toBundle(),
+                        resultReceiver,
+                        handler,
+                        RESULT_FAILURE,
+                        null,
+                        null
+                );
+            } else {
+                context.sendOrderedBroadcast(
+                        intent,
+                        null,
+                        resultReceiver,
+                        handler,
+                        RESULT_FAILURE,
+                        null,
+                        null
+                );
+            }
             Log.i(TAG, "extraBright rootBridge dispatched");
             return true;
         } catch (Throwable t) {

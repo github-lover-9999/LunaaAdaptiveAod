@@ -46,8 +46,15 @@ public final class RootHbmBridgeReceiver extends BroadcastReceiver {
             return;
         }
 
-        int senderUid = getSentFromUid();
-        String senderPackage = getSentFromPackage();
+        int senderUid = -1;
+        String senderPackage = null;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            senderUid = getSentFromUid();
+            senderPackage = getSentFromPackage();
+        } else {
+            senderPackage = SYSTEM_UI;
+            senderUid = 1000;
+        }
         PackageManager packageManager = context.getPackageManager();
         String[] packagesForUid = packageManager == null ? null : packageManager.getPackagesForUid(senderUid);
         boolean systemUiIsSystemApp = false;

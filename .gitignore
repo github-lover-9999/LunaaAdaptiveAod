@@ -7,5 +7,11 @@ dist/
 local.properties
 *.iml
 .idea/
-
 .worktrees/
+
+# Signing keys & secrets
+*.keystore
+*.jks
+*.key
+*.p12
+*.bak*
