@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="240" viewBox="0 0 1200 240" role="img" aria-labelledby="presetsTitle presetsDesc">
+  <title id="presetsTitle">Lunaa Adaptive AOD Calibrated Presets</title>
+  <desc id="presetsDesc">Comparison of Dim, Balanced, and Bright AOD presets</desc>
+  <defs>
+    <linearGradient id="pCard" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#161B22" />
+      <stop offset="100%" stop-color="#0E1217" />
+    </linearGradient>
+  </defs>
+
+  <rect width="1200" height="240" rx="20" fill="#070809" stroke="#21262D" stroke-width="1.5" />
+
+  <!-- Preset 1: DIM -->
+  <g transform="translate(40, 24)">
+    <rect width="350" height="192" rx="14" fill="url(#pCard)" stroke="#30363D" stroke-width="1.2" />
+    <rect width="350" height="32" rx="14" fill="#1C2128" />
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#9BA1A6">🌙 DIM (Night Mode)</text>
+    
+    <text x="16" y="64" font-family="ui-monospace, monospace" font-size="28" font-weight="800" fill="#FFFFFF">20% – 40%</text>
+    <text x="16" y="88" font-family="ui-monospace, monospace" font-size="12" fill="#8B949E">~15 – 35 nits</text>
+    
+    <text x="16" y="122" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" fill="#C9D1D9">• Gentle, non-distracting night clock</text>
+    <text x="16" y="144" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" fill="#C9D1D9">• Perfect for pitch-black bedrooms</text>
+    <text x="16" y="166" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" fill="#8B949E">• Zero glare / minimal battery use</text>
+  </g>
+
+  <!-- Preset 2: BALANCED -->
+  <g transform="translate(425, 24)">
+    <rect width="350" height="192" rx="14" fill="url(#pCard)" stroke="#FFC449" stroke-width="1.5" />
+    <rect width="350" height="32" rx="14" fill="#2E2412" />
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#FFC449">⚡ BALANCED (Recommended)</text>
+    
+    <text x="16" y="64" font-family="ui-monospace, monospace" font-size="28" font-weight="800" fill="#FFC449">50% – 76%</text>
+    <text x="16" y="88" font-family="ui-monospace, monospace" font-size="12" fill="#8B949E">~45 – 135 nits</text>
+    
+    <text x="16" y="122" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" fill="#C9D1D9">• 50% comfortable floor in darkness</text>
+    <text x="16" y="144" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" fill="#C9D1D9">• Punchy and clear in normal room light</text>
+    <text x="16" y="166" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" fill="#8B949E">• Optimal daily driver profile</text>
+  </g>
+
+  <!-- Preset 3: BRIGHT -->
+  <g transform="translate(810, 24)">
+    <rect width="350" height="192" rx="14" fill="url(#pCard)" stroke="#34D399" stroke-width="1.5" />
+    <rect width="350" height="32" rx="14" fill="#132B20" />
+    <text x="16" y="21" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="700" fill="#34D399">☀️ BRIGHT (Outdoor Daylight)</text>
+    
+    <text x="16" y="64" font-family="ui-monospace, monospace" font-size="28" font-weight="800" fill="#34D399">100% + HBM</text>
+    <text x="16" y="88" font-family="ui-monospace, monospace" font-size="12" fill="#8B949E">215 – 380 nits (Peak ~800 nits)</text>
+    
+    <text x="16" y="122" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" fill="#C9D1D9">• Constant high daytime visibility</text>
+    <text x="16" y="144" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" fill="#C9D1D9">• Hardware HBM under direct sunlight</text>
+    <text x="16" y="166" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" fill="#8B949E">• Instant optical UDFPS recovery</text>
+  </g>
+</svg>

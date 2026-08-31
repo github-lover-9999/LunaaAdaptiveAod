@@ -1,0 +1,134 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="420" viewBox="0 0 1200 420" role="img" aria-labelledby="heroTitle heroDesc">
+  <title id="heroTitle">Lunaa Adaptive AOD Hero Banner</title>
+  <desc id="heroDesc">Dynamic Always-On Display with Hardware HBM and Optical UDFPS Recovery for Realme GT Master Edition and AMOLED Android devices</desc>
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#070809" />
+      <stop offset="50%" stop-color="#0E1013" />
+      <stop offset="100%" stop-color="#070809" />
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFC449" />
+      <stop offset="50%" stop-color="#FFA826" />
+      <stop offset="100%" stop-color="#FF7B00" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#191C20" />
+      <stop offset="100%" stop-color="#101215" />
+    </linearGradient>
+    <linearGradient id="greenGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#34D399" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <radialGradient id="sunGlow" cx="80%" cy="30%" r="50%">
+      <stop offset="0%" stop-color="#FFC449" stop-opacity="0.18" />
+      <stop offset="100%" stop-color="#070809" stop-opacity="0" />
+    </radialGradient>
+    <radialGradient id="cyanGlow" cx="20%" cy="80%" r="40%">
+      <stop offset="0%" stop-color="#38BDF8" stop-opacity="0.10" />
+      <stop offset="100%" stop-color="#070809" stop-opacity="0" />
+    </radialGradient>
+  </defs>
+
+  <!-- Background Layer -->
+  <rect width="1200" height="420" rx="28" fill="url(#bgGrad)" stroke="#22272E" stroke-width="1.5" />
+  <rect width="1200" height="420" rx="28" fill="url(#sunGlow)" />
+  <rect width="1200" height="420" rx="28" fill="url(#cyanGlow)" />
+
+  <!-- Subtle Ambient Grid Pattern -->
+  <g opacity="0.15">
+    <line x1="60" y1="0" x2="60" y2="420" stroke="#4A5568" stroke-width="1" stroke-dasharray="4,4" />
+    <line x1="680" y1="0" x2="680" y2="420" stroke="#4A5568" stroke-width="1" stroke-dasharray="4,4" />
+    <line x1="0" y1="210" x2="1200" y2="210" stroke="#4A5568" stroke-width="1" stroke-dasharray="4,4" />
+  </g>
+
+  <!-- Left Content Column -->
+  <g id="header-text" transform="translate(60, 48)">
+    <!-- Badge -->
+    <g transform="translate(0, 0)">
+      <rect width="360" height="28" rx="14" fill="#1A1813" stroke="#FFC449" stroke-opacity="0.4" stroke-width="1" />
+      <circle cx="14" cy="14" r="4" fill="#FFC449" />
+      <text x="26" y="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="12" font-weight="700" fill="#FFC449" letter-spacing="1">LSPOSED • ROOT BRIDGE • AMOLED</text>
+    </g>
+
+    <!-- Main Title -->
+    <text x="0" y="78" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="46" font-weight="900" fill="#FFFFFF" letter-spacing="-0.5">Lunaa Adaptive AOD</text>
+    
+    <!-- Subtitle -->
+    <text x="0" y="112" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="400" fill="#9BA1A6">Dynamic ambient brightness &amp; outdoor daylight-readable Always-On Display.</text>
+    <text x="0" y="136" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="400" fill="#9BA1A6">Realme GT Master Edition (RMX3363) &amp; Android AMOLED Custom ROMs.</text>
+
+    <!-- Feature Pillars -->
+    <g transform="translate(0, 172)">
+      <!-- Pill 1: Hardware HBM -->
+      <g transform="translate(0, 0)">
+        <rect width="180" height="42" rx="10" fill="#15181C" stroke="#2D333B" stroke-width="1" />
+        <circle cx="20" cy="21" r="5" fill="#FFC449" />
+        <text x="34" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#F0F6FC">~800 Nits HBM</text>
+      </g>
+
+      <!-- Pill 2: Optical UDFPS -->
+      <g transform="translate(192, 0)">
+        <rect width="180" height="42" rx="10" fill="#15181C" stroke="#2D333B" stroke-width="1" />
+        <circle cx="20" cy="21" r="5" fill="#34D399" />
+        <text x="34" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#F0F6FC">UDFPS Recovery</text>
+      </g>
+
+      <!-- Pill 3: In-App Updater -->
+      <g transform="translate(384, 0)">
+        <rect width="180" height="42" rx="10" fill="#15181C" stroke="#2D333B" stroke-width="1" />
+        <circle cx="20" cy="21" r="5" fill="#38BDF8" />
+        <text x="34" y="26" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" font-weight="700" fill="#F0F6FC">1-Click Updater</text>
+      </g>
+    </g>
+
+    <!-- Version & Platform Badges -->
+    <g transform="translate(0, 248)">
+      <text x="0" y="16" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" font-weight="600" fill="#6E7681">RELEASE: <tspan fill="#34D399">v1.6.5</tspan> (API 26–36)  |  DEVICE: <tspan fill="#FFC449">RMX3363 / lunaa</tspan></text>
+      <text x="0" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" font-weight="600" fill="#6E7681">ENGINE: <tspan fill="#F0F6FC">Stevens' Power Law (0–20k Lux)</tspan>  |  LICENSE: <tspan fill="#F0F6FC">GPL-3.0</tspan></text>
+    </g>
+  </g>
+
+  <!-- Right Visual Specimen Card: Interactive Panel Simulation -->
+  <g id="specimen-card" transform="translate(740, 42)">
+    <rect width="400" height="336" rx="20" fill="url(#cardGrad)" stroke="#30363D" stroke-width="1.5" filter="drop-shadow(0 12px 32px rgba(0,0,0,0.6))" />
+    
+    <!-- Header of specimen card -->
+    <rect width="400" height="42" rx="20" fill="#1C2128" />
+    <circle cx="24" cy="21" r="6" fill="#FF5F56" />
+    <circle cx="44" cy="21" r="6" fill="#FFBD2E" />
+    <circle cx="64" cy="21" r="6" fill="#27C93F" />
+    <text x="92" y="26" font-family="ui-monospace, SFMono-Regular, monospace" font-size="12" font-weight="600" fill="#8B949E">AOD State: ACTIVE_DOZE</text>
+
+    <!-- Simulated AOD Screen -->
+    <g transform="translate(24, 60)">
+      <!-- Clock & Date -->
+      <text x="0" y="48" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="44" font-weight="800" fill="#FFFFFF">21:55</text>
+      <text x="0" y="74" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="14" font-weight="500" fill="#8B949E">Monday, Aug 31  •  27°C Fair</text>
+
+      <!-- Live Telemetry Box -->
+      <g transform="translate(0, 96)">
+        <rect width="352" height="110" rx="12" fill="#0D1117" stroke="#21262D" stroke-width="1" />
+        
+        <text x="16" y="26" font-family="ui-monospace, SFMono-Regular, monospace" font-size="12" fill="#8B949E">Ambient Sensor:</text>
+        <text x="145" y="26" font-family="ui-monospace, SFMono-Regular, monospace" font-size="12" font-weight="700" fill="#FFC449">2,450 lux [OUTDOORS]</text>
+
+        <text x="16" y="52" font-family="ui-monospace, SFMono-Regular, monospace" font-size="12" fill="#8B949E">AOD Panel Mode:</text>
+        <text x="145" y="52" font-family="ui-monospace, SFMono-Regular, monospace" font-size="12" font-weight="700" fill="#34D399">HARDWARE HBM (~800 nits)</text>
+
+        <text x="16" y="78" font-family="ui-monospace, SFMono-Regular, monospace" font-size="12" fill="#8B949E">UDFPS Sensor:</text>
+        <text x="145" y="78" font-family="ui-monospace, SFMono-Regular, monospace" font-size="12" font-weight="700" fill="#38BDF8">LOGICALLY REARMED (0)</text>
+
+        <text x="16" y="98" font-family="ui-monospace, SFMono-Regular, monospace" font-size="11" fill="#6E7681">Samsung AMOLED AMS643YE01 • Node: notify_fppress</text>
+      </g>
+
+      <!-- Fingerprint Icon Indicator -->
+      <g transform="translate(150, 220)">
+        <circle cx="26" cy="26" r="22" fill="#161B22" stroke="#34D399" stroke-width="1.5" stroke-dasharray="3,2" />
+        <path d="M18 26 C18 20, 34 20, 34 26 C34 30, 26 32, 26 36" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" />
+        <circle cx="26" cy="18" r="2" fill="#34D399" />
+        <text x="60" y="30" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" font-weight="600" fill="#34D399">Optical Reader Ready</text>
+      </g>
+    </g>
+  </g>
+</svg>
