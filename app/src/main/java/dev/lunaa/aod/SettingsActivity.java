@@ -1144,19 +1144,21 @@ public final class SettingsActivity extends Activity implements SensorEventListe
 
         updateStatusText = text("Version " + AodReleaseInfo.VERSION_NAME + " (" + AodReleaseInfo.VERSION_CODE + ")", 14f, false, false);
         updateStatusText.setTextColor(SettingsUiTheme.COLOR_TEXT);
+        updateStatusText.setPadding(0, 0, 0, dp(6));
         card.addView(updateStatusText);
 
         updateDetailsText = text("", 13f, false, false);
         updateDetailsText.setTextColor(SettingsUiTheme.COLOR_MUTED);
         updateDetailsText.setVisibility(View.GONE);
-        updateDetailsText.setPadding(0, dp(4), 0, dp(8));
+        updateDetailsText.setPadding(0, dp(6), 0, dp(10));
         card.addView(updateDetailsText);
 
         updateProgressBar = new ProgressBar(this, null, android.R.attr.progressBarStyleHorizontal);
         updateProgressBar.setMax(100);
         updateProgressBar.setVisibility(View.GONE);
-        updateProgressBar.setPadding(0, dp(6), 0, dp(6));
-        card.addView(updateProgressBar, fullWidth());
+        LinearLayout.LayoutParams progressParams = fullWidth();
+        progressParams.setMargins(0, dp(6), 0, dp(6));
+        card.addView(updateProgressBar, progressParams);
 
         updateActionButton = new Button(this);
         updateActionButton.setText("Check for updates");
@@ -1169,7 +1171,9 @@ public final class SettingsActivity extends Activity implements SensorEventListe
                 triggerUpdateCheck(true);
             }
         });
-        card.addView(updateActionButton, fullWidth());
+        LinearLayout.LayoutParams buttonParams = fullWidth();
+        buttonParams.setMargins(0, dp(10), 0, 0);
+        card.addView(updateActionButton, buttonParams);
 
         return card;
     }
