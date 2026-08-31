@@ -13,6 +13,7 @@
 <p align="center">
   <a href="https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/download/v1.6.5/LunaaAdaptiveAod-v1.6.5-signed.apk"><b>📥 Download Latest APK (v1.6.5)</b></a> •
   <a href="#-requirements"><b>📋 Requirements</b></a> •
+  <a href="#-how-to-install--use"><b>🚀 How to Install &amp; Use</b></a> •
   <a href="#-presets--calibration"><b>🎯 Presets</b></a> •
   <a href="#-architecture--how-it-works"><b>🛠️ Architecture</b></a> •
   <a href="#-русскоязычное-руководство"><b>🇷🇺 Русский гайд</b></a>
@@ -31,6 +32,23 @@
 
 > [!NOTE]
 > The dynamic perceptual brightness curve works universally across all Android AMOLED devices. Hardware HBM panel latching and UDFPS touch rearming target Oplus display drivers (`/sys/kernel/oplus_display/notify_fppress`) with graceful safety fallback for generic AOSP hardware.
+
+---
+
+## 🚀 How to Install & Use
+
+1. **📥 Download & Install APK**:
+   - Grab the latest signed APK from [Releases](https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/latest) (or directly download [`LunaaAdaptiveAod-v1.6.5-signed.apk`](https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/download/v1.6.5/LunaaAdaptiveAod-v1.6.5-signed.apk)).
+2. **⚙️ Enable in LSPosed**:
+   - Open **LSPosed Manager** (or Zygisk-Vector).
+   - Enable the **Lunaa Adaptive AOD** module.
+   - Ensure **System Framework** / **SystemUI** (`com.android.systemui`) is checked in the module's scope.
+   - Reboot your phone (recommended for initial LSPosed injection).
+3. **🎛️ Configure & Save**:
+   - Open **Lunaa Adaptive AOD** from your launcher.
+   - Grant **Root access** when prompted (required for Extra Bright HBM and 1-click updates).
+   - Select your preferred preset (**⚡ Balanced** for daily use or **☀️ Bright** for maximum outdoor visibility).
+   - Tap **Save changes**. Lock your device to enjoy daylight-readable, adaptive Always-On Display!
 
 ---
 
@@ -76,20 +94,6 @@ On Snapdragon 778G / Samsung AMOLED (AMS643YE01) panels:
 
 ---
 
-## 📦 Installation & Setup
-
-1. **Install APK**:
-   - Download [`LunaaAdaptiveAod-v1.6.5-signed.apk`](https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/latest).
-2. **Enable in LSPosed**:
-   - Open LSPosed Manager, enable the **Lunaa Adaptive AOD** module, and ensure **System Framework / SystemUI** is checked in its scope.
-   - Reboot your device (recommended for initial LSPosed injection).
-3. **Configure & Enjoy**:
-   - Open **Lunaa Adaptive AOD** from your app drawer.
-   - Grant Root access when prompted (for Extra Bright / Auto-Updater).
-   - Choose your preferred Preset (**Balanced** or **Bright**) and tap **Save changes**.
-
----
-
 ## 🇷🇺 Русскоязычное руководство
 
 ### 📋 Требования:
@@ -97,6 +101,12 @@ On Snapdragon 778G / Samsung AMOLED (AMS643YE01) panels:
 - **Xposed**: LSPosed или Zygisk-Vector с выбранным скоупом `SystemUI`.
 - **Root**: KernelSU, Magisk или APatch (нужен для HBM и 1-click автообновления).
 - **Устройство**: Оптимизировано для Realme GT Master Edition (`RMX3363` / `lunaa`), базовая адаптивная яркость работает на любых AMOLED экранах.
+
+### 🚀 Установка и настройка:
+1. Скачайте и установите APK из раздела [Releases](https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/latest).
+2. В приложении **LSPosed Manager** включите модуль **Lunaa Adaptive AOD** и отметьте `SystemUI` в списке приложений.
+3. Перезагрузите устройство для применения хука.
+4. Откройте приложение, предоставьте Root-права при запросе, выберите профиль (**Balanced** или **Bright**) и нажмите **Save changes**.
 
 ### 🌟 Основные возможности:
 1. **Адаптивная яркость AOD**: Экран блокировки плавно подстраивается под окружающее освещение благодаря датчику света.
