@@ -4,6 +4,7 @@
 
 <p align="center">
   <a href="https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/latest"><img src="https://img.shields.io/badge/Release-v1.6.5-FFC449.svg?style=for-the-badge&logo=github" alt="Latest Release" /></a>
+  <a href="https://github.com/github-lover-9999/LunaaAdaptiveAod/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/github-lover-9999/LunaaAdaptiveAod/ci.yml?branch=main&style=for-the-badge&logo=githubactions&label=CI%20Build" alt="CI Status" /></a>
   <a href="https://github.com/github-lover-9999/LunaaAdaptiveAod/releases"><img src="https://img.shields.io/badge/Android-8.0_--_16_(API_36)-34D399.svg?style=for-the-badge&logo=android" alt="Android Support" /></a>
   <a href="https://github.com/mywalkb/LSPosed_mod"><img src="https://img.shields.io/badge/Xposed-LSPosed_/_Zygisk--Vector-38BDF8.svg?style=for-the-badge&logo=xposed" alt="LSPosed Support" /></a>
   <a href="https://kernelsu.org/"><img src="https://img.shields.io/badge/Root-KernelSU_/_Magisk_/_APatch-A78BFA.svg?style=for-the-badge&logo=superuser" alt="Root Support" /></a>
