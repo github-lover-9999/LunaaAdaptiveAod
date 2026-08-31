@@ -13,7 +13,8 @@
 <p align="center">
   <a href="https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/download/v1.6.5/LunaaAdaptiveAod-v1.6.5-signed.apk"><b>📥 Download Latest APK (v1.6.5)</b></a> •
   <a href="#-requirements"><b>📋 Requirements</b></a> •
-  <a href="#-how-to-install--use"><b>🚀 How to Install &amp; Use</b></a> •
+  <a href="#-how-to-install--use"><b>🚀 How to Install &amp; Use</b></a>
+  <br>
   <a href="#-presets--brightness-modes"><b>🎯 Presets &amp; Modes</b></a> •
   <a href="#-extra-bright-hardware-aod-hbm"><b>🔥 Extra Bright (HBM)</b></a> •
   <a href="#-architecture--how-it-works"><b>🛠️ Architecture</b></a> •
