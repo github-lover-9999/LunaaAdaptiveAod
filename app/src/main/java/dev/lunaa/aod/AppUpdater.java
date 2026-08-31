@@ -71,31 +71,14 @@ public final class AppUpdater {
         EXECUTOR.execute(new Runnable() {
             @Override
             public void run() {
-                HttpURLConnection conn = null;
                 try {
-                    URL url = new URL(RELEASES_API_URL);
-                    conn = (HttpURLConnection) url.openConnection();
-                    conn.setRequestMethod("GET");
-                    conn.setRequestProperty("User-Agent", "LunaaAdaptiveAod-Updater");
-                    conn.setRequestProperty("Accept", "application/vnd.github.v3+json");
-                    conn.setConnectTimeout(10_000);
-                    conn.setReadTimeout(15_000);
-
-                    int responseCode = conn.getResponseCode();
-                    if (responseCode != HttpURLConnection.HTTP_OK) {
-                        postError(callback, "HTTP " + responseCode + ": " + conn.getResponseMessage());
+                    String jsonStr = fetchReleaseJson(RELEASES_API_URL);
+                    if (jsonStr == null || jsonStr.isEmpty()) {
+                        postError(callback, "Unable to reach GitHub (check connection or Private DNS)");
                         return;
                     }
 
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-                    StringBuilder sb = new StringBuilder();
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        sb.append(line).append('\n');
-                    }
-                    reader.close();
-
-                    final ReleaseInfo releaseInfo = parseReleaseJson(sb.toString(), AodReleaseInfo.VERSION_NAME, AodReleaseInfo.VERSION_CODE);
+                    final ReleaseInfo releaseInfo = parseReleaseJson(jsonStr, AodReleaseInfo.VERSION_NAME, AodReleaseInfo.VERSION_CODE);
                     postToMain(new Runnable() {
                         @Override
                         public void run() {
@@ -107,11 +90,66 @@ public final class AppUpdater {
                         Log.w(TAG, "Update check failed", t);
                     } catch (Throwable ignored) {}
                     postError(callback, "Failed to check for updates: " + t.getMessage());
-                } finally {
-                    if (conn != null) conn.disconnect();
                 }
             }
         });
+    }
+
+    private static String fetchReleaseJson(String urlString) {
+        HttpURLConnection conn = null;
+        try {
+            URL url = new URL(urlString);
+            conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("User-Agent", "LunaaAdaptiveAod-Updater");
+            conn.setRequestProperty("Accept", "application/vnd.github.v3+json");
+            conn.setConnectTimeout(8_000);
+            conn.setReadTimeout(10_000);
+
+            if (conn.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                BufferedReader reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+                StringBuilder sb = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    sb.append(line).append('\n');
+                }
+                reader.close();
+                return sb.toString();
+            }
+        } catch (Throwable t) {
+            try {
+                Log.w(TAG, "Standard HTTP check failed: " + t.getMessage() + ", trying root curl fallback");
+            } catch (Throwable ignored) {}
+        } finally {
+            if (conn != null) conn.disconnect();
+        }
+
+        return fetchJsonViaRoot(urlString);
+    }
+
+    private static String fetchJsonViaRoot(String urlString) {
+        try {
+            Process process = Runtime.getRuntime().exec(new String[]{
+                    "su", "-c", "curl -s -L -H 'User-Agent: LunaaAdaptiveAod-Updater' -H 'Accept: application/vnd.github.v3+json' \"" + urlString + "\""
+            });
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append('\n');
+            }
+            reader.close();
+            process.waitFor();
+            String result = sb.toString().trim();
+            if (result.startsWith("{") && result.endsWith("}")) {
+                return result;
+            }
+        } catch (Throwable t) {
+            try {
+                Log.w(TAG, "Root curl check failed", t);
+            } catch (Throwable ignored) {}
+        }
+        return null;
     }
 
     public static ReleaseInfo parseReleaseJson(String jsonStr, String currentVersionName, int currentVersionCode) {
@@ -200,19 +238,20 @@ public final class AppUpdater {
         EXECUTOR.execute(new Runnable() {
             @Override
             public void run() {
+                File dir = new File(context.getCacheDir(), "updates");
+                if (!dir.exists()) dir.mkdirs();
+                final File targetFile = new File(dir, targetName != null ? targetName : "update.apk");
+
                 HttpURLConnection conn = null;
                 InputStream in = null;
                 FileOutputStream out = null;
+                boolean standardSuccess = false;
                 try {
-                    File dir = new File(context.getCacheDir(), "updates");
-                    if (!dir.exists()) dir.mkdirs();
-                    final File targetFile = new File(dir, targetName != null ? targetName : "update.apk");
-
                     URL url = new URL(downloadUrl);
                     conn = (HttpURLConnection) url.openConnection();
                     conn.setRequestProperty("User-Agent", "LunaaAdaptiveAod-Updater");
-                    conn.setConnectTimeout(15_000);
-                    conn.setReadTimeout(30_000);
+                    conn.setConnectTimeout(10_000);
+                    conn.setReadTimeout(20_000);
 
                     int code = conn.getResponseCode();
                     if (code == HttpURLConnection.HTTP_MOVED_TEMP || code == HttpURLConnection.HTTP_MOVED_PERM || code == 307 || code == 308) {
@@ -249,30 +288,52 @@ public final class AppUpdater {
                         }
                     }
                     out.flush();
+                    standardSuccess = true;
+                } catch (final Throwable t) {
+                    try {
+                        Log.w(TAG, "Standard download failed: " + t.getMessage() + ", attempting root curl download");
+                    } catch (Throwable ignored) {}
+                } finally {
+                    try { if (in != null) in.close(); } catch (Throwable ignored) {}
+                    try { if (out != null) out.close(); } catch (Throwable ignored) {}
+                    if (conn != null) conn.disconnect();
+                }
 
+                if (!standardSuccess) {
+                    standardSuccess = downloadViaRoot(downloadUrl, targetFile);
+                }
+
+                if (standardSuccess && targetFile.exists() && targetFile.length() > 0) {
                     postToMain(new Runnable() {
                         @Override
                         public void run() {
                             if (callback != null) callback.onDownloaded(targetFile);
                         }
                     });
-                } catch (final Throwable t) {
-                    try {
-                        Log.e(TAG, "APK download failed", t);
-                    } catch (Throwable ignored) {}
+                } else {
                     postToMain(new Runnable() {
                         @Override
                         public void run() {
-                            if (callback != null) callback.onError(t.getMessage());
+                            if (callback != null) callback.onError("Download failed via both standard HTTP and root fallback");
                         }
                     });
-                } finally {
-                    try { if (in != null) in.close(); } catch (Throwable ignored) {}
-                    try { if (out != null) out.close(); } catch (Throwable ignored) {}
-                    if (conn != null) conn.disconnect();
                 }
             }
         });
+    }
+
+    private static boolean downloadViaRoot(String downloadUrl, File targetFile) {
+        try {
+            String command = "curl -s -L -H 'User-Agent: LunaaAdaptiveAod-Updater' \"" + downloadUrl + "\" -o \"" + targetFile.getAbsolutePath() + "\" && chmod 644 \"" + targetFile.getAbsolutePath() + "\"";
+            Process process = Runtime.getRuntime().exec(new String[]{"su", "-c", command});
+            int exit = process.waitFor();
+            return exit == 0 && targetFile.exists() && targetFile.length() > 1000;
+        } catch (Throwable t) {
+            try {
+                Log.e(TAG, "Root curl download failed", t);
+            } catch (Throwable ignored) {}
+            return false;
+        }
     }
 
     public static boolean installApkWithRoot(Context context, File apkFile) {
