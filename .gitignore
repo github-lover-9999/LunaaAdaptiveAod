@@ -1,0 +1,11 @@
+.gradle/
+.tools/
+build/
+app/build/
+xposed-stubs/build/
+dist/
+local.properties
+*.iml
+.idea/
+
+.worktrees/

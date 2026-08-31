@@ -1,0 +1,38 @@
+from pathlib import Path
+ROOT = Path(__file__).resolve().parents[1]
+
+def read(rel): return (ROOT/rel).read_text(encoding='utf-8')
+def require(c,m):
+    if not c: raise AssertionError(m)
+
+controller = read('app/src/main/java/dev/lunaa/aod/OplusExtraBrightnessController.java')
+client = read('app/src/main/java/dev/lunaa/aod/RootHbmBridgeClient.java')
+receiver = read('app/src/main/java/dev/lunaa/aod/RootHbmBridgeReceiver.java')
+policy = read('app/src/main/java/dev/lunaa/aod/RootBridgeSenderPolicy.java')
+primer = read('app/src/main/java/dev/lunaa/aod/RootAccessPrimer.java')
+manifest = read('app/src/main/AndroidManifest.xml')
+activity = read('app/src/main/java/dev/lunaa/aod/SettingsActivity.java')
+hooks = read('app/src/main/java/dev/lunaa/aod/SystemUiHooks.java')
+gradle = read('app/build.gradle.kts')
+
+require('ProcessBuilder("su"' not in controller, 'SystemUI must never execute su directly')
+require('RootHbmBridgeClient' in controller, 'controller not routed through root bridge')
+require('setShareIdentityEnabled(true)' in client, 'sender identity not shared')
+require('sendOrderedBroadcast' in client, 'root result must be acknowledged')
+require('Process.SYSTEM_UID' not in receiver, 'receiver must not assume SystemUI uid=1000')
+require('getSentFromUid()' in receiver and 'getSentFromPackage()' in receiver, 'receiver must inspect framework sender identity')
+require('getPackagesForUid(senderUid)' in receiver, 'receiver must verify package ownership for runtime UID')
+require('ApplicationInfo.FLAG_SYSTEM' in receiver or 'FLAG_UPDATED_SYSTEM_APP' in receiver, 'receiver must require system app identity')
+require('RootBridgeSenderPolicy.isTrusted' in receiver, 'receiver must use tested sender policy')
+require('RootCommandGate' in receiver and 'newSingleThreadExecutor' in receiver, 'receiver must serialize and generation-gate root commands')
+require('TimeUnit.MILLISECONDS' in receiver, 'root writes must have bounded wait')
+require('com.android.systemui' in policy, 'sender policy must target SystemUI package')
+require('runRootWrite("0")' in receiver and 'Thread.sleep(EDGE_DELAY_MS)' in receiver and 'runRootWrite("1")' in receiver, 'receiver must preserve proven 0->1 edge')
+require('ACTION_RESET' in client and 'requestReset' in controller, 'root reset path missing')
+require('goAsync()' in receiver and 'waitFor(' in receiver, 'root work must finish before ordered result')
+require('android:exported="true"' in manifest and '.RootHbmBridgeReceiver' in manifest, 'bridge receiver not exported in manifest')
+require('<queries>' in manifest and 'android:name="com.android.systemui"' in manifest, 'SystemUI package visibility declaration missing')
+require('RootAccessPrimer.request' in activity, 'Save must prime root while UI is visible')
+require('mContext' in hooks, 'SystemUI Context recovery missing')
+require('versionName = "1.6.0"' in gradle, 'release version must be 1.5.6')
+print('PASS v1.6.0 root bridge source requirements')

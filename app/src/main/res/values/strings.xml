@@ -1,0 +1,90 @@
+<resources>
+    <string name="app_name">Lunaa Adaptive AOD</string>
+    <string name="app_description">Adaptive AOD brightness for crDroid Android 16 on lunaa</string>
+    <string name="settings_intro">Choose Automatic for sensor-based brightness or Manual for one fixed level.</string>
+
+    <string name="module_status">MODULE</string>
+    <string name="adaptive_aod">AOD Control</string>
+    <string name="module_enabled_detail">Enabled. AOD brightness follows the selected mode.</string>
+    <string name="module_disabled_detail">Disabled. Stock crDroid AOD brightness is used.</string>
+    <string name="apply_next_cycle">Changes apply on the next AOD activation</string>
+
+    <string name="mode">Mode</string>
+    <string name="mode_help">Automatic reacts to ambient light. Manual keeps one fixed brightness level.</string>
+    <string name="mode_automatic">Automatic</string>
+    <string name="mode_manual">Manual</string>
+
+    <string name="live_status">Current output</string>
+    <string name="ambient_waiting">Ambient light: waiting for sensor…</string>
+    <string name="ambient_value">Ambient light: %1$s · %2$.0f lux</string>
+    <string name="ambient_dark">Dark</string>
+    <string name="ambient_indoor">Indoor</string>
+    <string name="ambient_bright_indoor">Bright indoor</string>
+    <string name="ambient_daylight">Daylight</string>
+    <string name="ambient_strong_daylight">Strong daylight</string>
+    <string name="preview_waiting">Current AOD brightness: waiting for sensor…</string>
+    <string name="preview_current_percent">Current AOD brightness: %1$d%%</string>
+    <string name="preview_manual_level">Manual %1$s · %2$d%%</string>
+    <string name="preview_stock">Stock crDroid AOD brightness is active</string>
+    <string name="light_sensor_unavailable">Ambient light sensor unavailable</string>
+    <string name="extra_bright_available_level">Extra Bright %1$s · %2$d%% · available in strong daylight</string>
+    <string name="extra_bright_active_outdoors_level">Extra Bright %1$s · %2$d%% requested for this AOD session</string>
+
+    <string name="automatic_settings">Automatic brightness</string>
+    <string name="automatic_help">Pick a fixed profile. Balanced uses the full normal AOD range; Bright Daylight can add Extra Bright in strong daylight.</string>
+    <string name="presets">Preset</string>
+    <string name="preset_dim">DIM</string>
+    <string name="preset_dim_detail">Night</string>
+    <string name="preset_balanced">BALANCED</string>
+    <string name="preset_balanced_detail">Everyday</string>
+    <string name="preset_bright">BRIGHT</string>
+    <string name="preset_bright_detail">Daylight</string>
+    <string name="maximum_brightness">Maximum brightness</string>
+    <string name="cap_range">Range %1$d–%2$d%%</string>
+    <string name="preset_dim_description">Softest automatic profile for dark rooms and night use.</string>
+    <string name="preset_balanced_description">Recommended everyday profile using the full normal AOD brightness range without HBM.</string>
+    <string name="preset_bright_description">Bright Daylight uses the full normal range and can add Extra Bright above the daylight threshold.</string>
+    <string name="extra_bright_auto_hint">Bright Daylight can use Extra Bright in strong daylight. Turn it off below to keep the bright curve without HBM.</string>
+    <string name="automatic_extra_bright_toggle">Enable Extra Bright (HBM)</string>
+    <string name="automatic_extra_bright_disabled">Extra Bright is off. Bright Daylight stays on the normal AOD brightness curve without HBM.</string>
+
+    <string name="manual_settings">Manual brightness</string>
+    <string name="manual_help">Uses one fixed AOD level and ignores ambient light.</string>
+    <string name="manual_brightness">Manual brightness</string>
+    <string name="manual_brightness_help">Choose Dim, Balanced or Bright. Bright is 100% normal AOD brightness; Extra Bright is controlled separately.</string>
+    <string name="manual_extra_bright_toggle">Enable Extra Bright</string>
+    <string name="manual_extra_bright_disabled">Extra Bright is off. Manual Bright stays at 100% normal AOD brightness.</string>
+    <string name="manual_extra_bright_active">Manual Bright requests Extra Bright · %1$s · %2$d%%</string>
+
+    <string name="extra_bright_level_title">Extra Bright</string>
+    <string name="extra_bright_level">Extra Bright strength</string>
+    <string name="extra_bright_level_help">Choose Low, Medium or Max HBM strength. Manual Bright and Bright Daylight each have their own Extra Bright toggle.</string>
+    <string name="extra_bright_level_range">Low is softer and Max is full fingerprint-HBM. Exact percentages are available in Advanced settings.</string>
+    <string name="manual_level_dim">Dim</string>
+    <string name="manual_level_balanced">Balanced</string>
+    <string name="manual_level_bright">Bright</string>
+    <string name="extra_level_low">Low</string>
+    <string name="extra_level_medium">Medium</string>
+    <string name="extra_level_max">Max</string>
+
+    <string name="advanced_settings_collapsed">Advanced settings  ▾</string>
+    <string name="advanced_settings_expanded">Advanced settings  ▴</string>
+    <string name="advanced_settings_help">Set the exact percentage behind each named brightness level. Values must stay between 1 and 100 and increase from left to right.</string>
+    <string name="manual_brightness_levels">Manual brightness levels</string>
+    <string name="extra_bright_levels">Extra Bright levels</string>
+    <string name="manual_level_percent_description">Manual brightness %1$s percentage</string>
+    <string name="extra_level_percent_description">Extra Bright %1$s percentage</string>
+    <string name="advanced_error_range">Enter a value from 1 to 100 for every level.</string>
+    <string name="advanced_error_order">Manual must be Dim ≤ Balanced ≤ Bright and Extra Bright must be Low ≤ Medium ≤ Max.</string>
+    <string name="advanced_invalid">Fix Advanced settings before saving.</string>
+
+    <string name="save_changes">Save changes</string>
+    <string name="reset">Reset</string>
+    <string name="reset_not_saved">Defaults restored in the form. Tap Save changes to apply them.</string>
+    <string name="preset_not_saved">Preset changed. Tap Save changes to apply it.</string>
+    <string name="shared_prefs_unavailable">Settings cannot be exposed to Vector/Xposed on this build; Save changes is disabled.</string>
+    <string name="save_success">Saved. Changes apply on the next AOD activation.</string>
+    <string name="save_failed">Settings could not be committed.</string>
+    <string name="high_manual_brightness_warning">Very high manual AOD brightness can use more power.</string>
+    <string name="empty"></string>
+</resources>
