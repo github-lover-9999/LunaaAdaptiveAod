@@ -13,7 +13,7 @@ public class ReleaseMetadataTest {
 
         assertTrue(gradle.contains("versionCode = 16500"));
         assertTrue(gradle.contains("versionName = \"1.6.5\""));
-        assertTrue(buildScript.contains("LunaaAdaptiveAod-v1.6.4m-build.apk"));
+        assertTrue(buildScript.contains("LunaaAdaptiveAod-v1.6.5-build.apk"));
         assertTrue(readme.contains("Lunaa Adaptive AOD"));
     }
 
