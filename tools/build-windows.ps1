@@ -142,7 +142,7 @@ try {
 
 $BuiltApk = Join-Path $ProjectRoot "app\build\outputs\apk\debug\app-debug.apk"
 if (-not (Test-Path $BuiltApk)) { throw "Gradle reported success but APK was not found: $BuiltApk" }
-$OutputApk = Join-Path $DistRoot "LunaaAdaptiveAod-v1.6.5-build.apk"
+$OutputApk = Join-Path $DistRoot "LunaaAdaptiveAod-v1.6.6-build.apk"
 Copy-Item -Force $BuiltApk $OutputApk
 
 Write-Step "Verifying APK metadata and legacy Xposed entry"
