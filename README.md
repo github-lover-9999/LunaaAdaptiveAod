@@ -66,7 +66,7 @@
 ## 🎯 Presets & Brightness Modes
 
 <p align="center">
-  <img src="assets/readme/presets.svg" alt="Lunaa Adaptive AOD Presets & Extra Bright Mode" width="100%" />
+  <img src="assets/readme/presets-breakdown.svg" alt="Lunaa Adaptive AOD Presets & Extra Bright Mode" width="100%" />
 </p>
 
 ### 1. Automatic Mode (3 Calibrated Presets)
