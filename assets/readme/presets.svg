@@ -1,96 +1,68 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="340" viewBox="0 0 1200 340" role="img" aria-labelledby="presetsTitle presetsDesc">
-  <title id="presetsTitle">Lunaa Adaptive AOD Profiles &amp; Extra Bright Mode</title>
-  <desc id="presetsDesc">Detailed breakdown of Dim, Balanced, Bright presets and the Hardware Extra Bright HBM mode</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="260" viewBox="0 0 1200 260" role="img" aria-labelledby="presetsTitle presetsDesc">
+  <title id="presetsTitle">Lunaa Adaptive AOD Presets and Extra Bright Mode</title>
+  <desc id="presetsDesc">4-card comparison of Dim, Balanced, Bright, and Extra Bright HBM modes</desc>
   <defs>
     <linearGradient id="pCard" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#161B22" />
       <stop offset="100%" stop-color="#0E1217" />
     </linearGradient>
-    <linearGradient id="extraGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#2D1A04" />
-      <stop offset="50%" stop-color="#1E1408" />
-      <stop offset="100%" stop-color="#161B22" />
-    </linearGradient>
   </defs>
 
-  <!-- Container Box -->
-  <rect width="1200" height="340" rx="24" fill="#070809" stroke="#21262D" stroke-width="1.5" />
+  <rect width="1200" height="260" rx="20" fill="#070809" stroke="#21262D" stroke-width="1.5" />
 
-  <!-- Section Header -->
-  <g transform="translate(40, 24)">
-    <text x="0" y="0" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="18" font-weight="800" fill="#FFFFFF">Calibrated AOD Presets &amp; Extra Bright System</text>
-    <text x="0" y="20" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif" font-size="13" fill="#8B949E">Engineered specifically for AMOLED displays to balance readability, comfort, and zero battery drain.</text>
-  </g>
-
-  <!-- 3 Main Preset Cards -->
   <!-- Card 1: DIM -->
-  <g transform="translate(40, 64)">
-    <rect width="350" height="152" rx="14" fill="url(#pCard)" stroke="#30363D" stroke-width="1.2" />
-    <rect width="350" height="28" rx="14" fill="#1C2128" />
-    <text x="14" y="19" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" font-weight="700" fill="#9BA1A6">🌙 DIM (Night Mode)</text>
+  <g transform="translate(40, 24)">
+    <rect width="264" height="212" rx="14" fill="url(#pCard)" stroke="#30363D" stroke-width="1.2" />
+    <rect width="264" height="32" rx="14" fill="#1C2128" />
+    <text x="14" y="21" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" font-weight="700" fill="#9BA1A6">🌙 DIM (Night Mode)</text>
     
-    <text x="14" y="58" font-family="ui-monospace, monospace" font-size="24" font-weight="800" fill="#FFFFFF">20% – 40%</text>
-    <text x="14" y="78" font-family="ui-monospace, monospace" font-size="11" fill="#8B949E">~15 – 35 nits</text>
+    <text x="14" y="66" font-family="ui-monospace, monospace" font-size="24" font-weight="800" fill="#FFFFFF">20% – 40%</text>
+    <text x="14" y="88" font-family="ui-monospace, monospace" font-size="11" fill="#8B949E">~15 – 35 nits</text>
     
-    <text x="14" y="104" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#C9D1D9">• Soft, zero-glare night clock</text>
-    <text x="14" y="124" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#C9D1D9">• Perfect for dark bedrooms</text>
+    <text x="14" y="122" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#C9D1D9">• Soft, zero-glare night clock</text>
+    <text x="14" y="146" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#C9D1D9">• Perfect for dark bedrooms</text>
+    <text x="14" y="170" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#8B949E">• Zero battery drain</text>
   </g>
 
   <!-- Card 2: BALANCED -->
-  <g transform="translate(425, 64)">
-    <rect width="350" height="152" rx="14" fill="url(#pCard)" stroke="#FFC449" stroke-width="1.5" />
-    <rect width="350" height="28" rx="14" fill="#2E2412" />
-    <text x="14" y="19" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" font-weight="700" fill="#FFC449">⚡ BALANCED (Recommended)</text>
+  <g transform="translate(324, 24)">
+    <rect width="264" height="212" rx="14" fill="url(#pCard)" stroke="#FFC449" stroke-width="1.5" />
+    <rect width="264" height="32" rx="14" fill="#2E2412" />
+    <text x="14" y="21" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" font-weight="700" fill="#FFC449">⚡ BALANCED (Daily)</text>
     
-    <text x="14" y="58" font-family="ui-monospace, monospace" font-size="24" font-weight="800" fill="#FFC449">50% – 76%</text>
-    <text x="14" y="78" font-family="ui-monospace, monospace" font-size="11" fill="#8B949E">~45 – 135 nits (to 100% on 20k lux)</text>
+    <text x="14" y="66" font-family="ui-monospace, monospace" font-size="24" font-weight="800" fill="#FFC449">50% – 76%</text>
+    <text x="14" y="88" font-family="ui-monospace, monospace" font-size="11" fill="#8B949E">~45 – 135 nits</text>
     
-    <text x="14" y="104" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#C9D1D9">• 50% comfortable floor in darkness</text>
-    <text x="14" y="124" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#C9D1D9">• Clear and vivid in everyday room light</text>
+    <text x="14" y="122" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#C9D1D9">• 50% comfortable night floor</text>
+    <text x="14" y="146" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#C9D1D9">• Clear in normal room light</text>
+    <text x="14" y="170" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#8B949E">• Up to 100% on 20k lux</text>
   </g>
 
   <!-- Card 3: BRIGHT -->
-  <g transform="translate(810, 64)">
-    <rect width="350" height="152" rx="14" fill="url(#pCard)" stroke="#38BDF8" stroke-width="1.5" />
-    <rect width="350" height="28" rx="14" fill="#132332" />
-    <text x="14" y="19" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" font-weight="700" fill="#38BDF8">☀️ BRIGHT (Daylight Mode)</text>
+  <g transform="translate(608, 24)">
+    <rect width="264" height="212" rx="14" fill="url(#pCard)" stroke="#38BDF8" stroke-width="1.5" />
+    <rect width="264" height="32" rx="14" fill="#132332" />
+    <text x="14" y="21" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" font-weight="700" fill="#38BDF8">☀️ BRIGHT (Daylight)</text>
     
-    <text x="14" y="58" font-family="ui-monospace, monospace" font-size="24" font-weight="800" fill="#38BDF8">100% Fixed</text>
-    <text x="14" y="78" font-family="ui-monospace, monospace" font-size="11" fill="#8B949E">215 – 380 nits normal curve</text>
+    <text x="14" y="66" font-family="ui-monospace, monospace" font-size="24" font-weight="800" fill="#38BDF8">100% Fixed</text>
+    <text x="14" y="88" font-family="ui-monospace, monospace" font-size="11" fill="#8B949E">215 – 380 nits curve</text>
     
-    <text x="14" y="104" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#C9D1D9">• Constant high daytime visibility</text>
-    <text x="14" y="124" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#C9D1D9">• Auto-triggers Extra Bright in direct sun</text>
+    <text x="14" y="122" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#C9D1D9">• Maximum daytime clarity</text>
+    <text x="14" y="146" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#C9D1D9">• Standard AOD upper limit</text>
+    <text x="14" y="170" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#8B949E">• Pre-arms HBM for sunlight</text>
   </g>
 
-  <!-- Bottom Dedicated Extra Bright HBM Showcase Bar -->
-  <g transform="translate(40, 230)">
-    <rect width="1120" height="84" rx="14" fill="url(#extraGrad)" stroke="#FF8400" stroke-width="1.5" />
+  <!-- Card 4: EXTRA BRIGHT (HBM) -->
+  <g transform="translate(892, 24)">
+    <rect width="264" height="212" rx="14" fill="url(#pCard)" stroke="#FF5500" stroke-width="1.5" />
+    <rect width="264" height="32" rx="14" fill="#2E1204" />
+    <text x="14" y="21" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" font-weight="700" fill="#FF5500">🔥 EXTRA BRIGHT (HBM)</text>
     
-    <!-- Left Icon & Title -->
-    <g transform="translate(20, 16)">
-      <rect width="34" height="34" rx="8" fill="#FF8400" fill-opacity="0.2" stroke="#FF8400" stroke-width="1" />
-      <text x="9" y="24" font-size="18">🔥</text>
-      <text x="46" y="22" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="15" font-weight="800" fill="#FFA533">EXTRA BRIGHT (Hardware AOD-HBM)</text>
-      <text x="46" y="44" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#C9D1D9">Direct AMOLED panel latching up to <tspan font-weight="700" fill="#FFFFFF">~800 nits</tspan> on direct sunlight (>1,500 lux) or Manual Level 3.</text>
-    </g>
-
-    <!-- Right Strength Pills & UDFPS indicator -->
-    <g transform="translate(730, 20)">
-      <!-- Pill 1: Low 50% -->
-      <g transform="translate(0, 4)">
-        <rect width="105" height="34" rx="8" fill="#1C1812" stroke="#FFC449" stroke-opacity="0.4" stroke-width="1" />
-        <text x="12" y="22" font-family="ui-monospace, monospace" font-size="12" font-weight="700" fill="#FFC449">Low (50%)</text>
-      </g>
-      <!-- Pill 2: Med 75% -->
-      <g transform="translate(115, 4)">
-        <rect width="110" height="34" rx="8" fill="#1C1812" stroke="#FF8400" stroke-opacity="0.6" stroke-width="1" />
-        <text x="12" y="22" font-family="ui-monospace, monospace" font-size="12" font-weight="700" fill="#FF8400">Med (75%)</text>
-      </g>
-      <!-- Pill 3: Max 100% -->
-      <g transform="translate(235, 4)">
-        <rect width="140" height="34" rx="8" fill="#2E1204" stroke="#FF4500" stroke-width="1.2" />
-        <text x="12" y="22" font-family="ui-monospace, monospace" font-size="12" font-weight="800" fill="#FF5500">Max (100% HBM)</text>
-      </g>
-    </g>
+    <text x="14" y="66" font-family="ui-monospace, monospace" font-size="24" font-weight="800" fill="#FF5500">~800 Nits</text>
+    <text x="14" y="88" font-family="ui-monospace, monospace" font-size="11" fill="#FFA533">Low (50%) | Med | Max (100%)</text>
+    
+    <text x="14" y="122" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#C9D1D9">• Direct sunlight (>1500 lux)</text>
+    <text x="14" y="146" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#C9D1D9">• Panel-level hardware HBM</text>
+    <text x="14" y="170" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" fill="#34D399">• Instant optical UDFPS fix</text>
   </g>
 </svg>
