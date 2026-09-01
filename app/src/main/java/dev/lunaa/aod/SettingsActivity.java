@@ -55,8 +55,10 @@ public final class SettingsActivity extends Activity implements SensorEventListe
     private TextView updateStatusText;
     private TextView updateDetailsText;
     private Button updateActionButton;
+    private Button restartSystemUiButton;
     private ProgressBar updateProgressBar;
     private AppUpdater.ReleaseInfo latestRelease;
+    private boolean pendingRestartSystemUi;
     private TextView extraBrightnessHint;
 
     private SeekBar manualBrightnessSeekBar;
@@ -131,6 +133,7 @@ public final class SettingsActivity extends Activity implements SensorEventListe
         } else if (ambientValue != null) {
             ambientValue.setText(R.string.light_sensor_unavailable);
         }
+        refreshUpdateCardState();
     }
 
     @Override
@@ -1107,7 +1110,9 @@ public final class SettingsActivity extends Activity implements SensorEventListe
         title.setPadding(0, dp(4), 0, dp(6));
         card.addView(title);
 
-        updateStatusText = text("Version " + AodReleaseInfo.VERSION_NAME + " (" + AodReleaseInfo.VERSION_CODE + ")", 14f, false, false);
+        String currentVer = AodReleaseInfo.getInstalledVersionName(this);
+        int currentCode = AodReleaseInfo.getInstalledVersionCode(this);
+        updateStatusText = text("Version " + currentVer + " (" + currentCode + ")", 14f, false, false);
         updateStatusText.setTextColor(SettingsUiTheme.COLOR_TEXT);
         updateStatusText.setPadding(0, 0, 0, dp(6));
         card.addView(updateStatusText);
@@ -1125,22 +1130,68 @@ public final class SettingsActivity extends Activity implements SensorEventListe
         progressParams.setMargins(0, dp(6), 0, dp(6));
         card.addView(updateProgressBar, progressParams);
 
+        LinearLayout buttonRow = horizontal();
         updateActionButton = new Button(this);
         updateActionButton.setText("Check for updates");
         SettingsUiTheme.styleButton(updateActionButton, density(), false);
         updateActionButton.setOnClickListener(v -> {
             animateActionButton(v);
-            if (latestRelease != null && latestRelease.hasUpdate && latestRelease.apkDownloadUrl != null) {
+            if (pendingRestartSystemUi) {
+                boolean ok = AppUpdater.restartSystemUi();
+                if (ok) {
+                    Toast.makeText(SettingsActivity.this, "SystemUI restarted successfully!", Toast.LENGTH_SHORT).show();
+                    pendingRestartSystemUi = false;
+                    triggerUpdateCheck(false);
+                } else {
+                    Toast.makeText(SettingsActivity.this, "Root restart failed; please reboot or restart SystemUI manually", Toast.LENGTH_SHORT).show();
+                }
+            } else if (latestRelease != null && latestRelease.hasUpdate && latestRelease.apkDownloadUrl != null) {
                 startUpdateDownload(latestRelease);
             } else {
                 triggerUpdateCheck(true);
             }
         });
+        buttonRow.addView(updateActionButton, weighted());
+
+        restartSystemUiButton = new Button(this);
+        restartSystemUiButton.setText("⚡ Restart UI");
+        SettingsUiTheme.styleSecondaryButton(restartSystemUiButton, density());
+        restartSystemUiButton.setOnClickListener(v -> {
+            animateActionButton(v);
+            boolean ok = AppUpdater.restartSystemUi();
+            if (ok) {
+                Toast.makeText(SettingsActivity.this, "SystemUI restarted successfully!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(SettingsActivity.this, "Could not restart SystemUI via root", Toast.LENGTH_SHORT).show();
+            }
+        });
+        buttonRow.addView(restartSystemUiButton, wrap());
+
         LinearLayout.LayoutParams buttonParams = fullWidth();
         buttonParams.setMargins(0, dp(10), 0, 0);
-        card.addView(updateActionButton, buttonParams);
+        card.addView(buttonRow, buttonParams);
 
         return card;
+    }
+
+    private void refreshUpdateCardState() {
+        String currentVersion = AodReleaseInfo.getInstalledVersionName(this);
+        int currentCode = AodReleaseInfo.getInstalledVersionCode(this);
+        if (latestRelease == null || !latestRelease.hasUpdate
+                || !AppUpdater.isNewerVersion(currentVersion, currentCode, latestRelease.tagName, latestRelease.changelog)) {
+            pendingRestartSystemUi = false;
+            if (updateStatusText != null) {
+                updateStatusText.setText("Version " + currentVersion + " (Latest)");
+                updateStatusText.setTextColor(SettingsUiTheme.COLOR_TEXT);
+            }
+            if (updateDetailsText != null) {
+                updateDetailsText.setVisibility(View.GONE);
+            }
+            if (updateActionButton != null) {
+                updateActionButton.setText("Check for updates");
+                SettingsUiTheme.styleButton(updateActionButton, density(), false);
+            }
+        }
     }
 
     private void triggerUpdateCheck(boolean manual) {
@@ -1156,7 +1207,12 @@ public final class SettingsActivity extends Activity implements SensorEventListe
             public void onSuccess(AppUpdater.ReleaseInfo releaseInfo) {
                 latestRelease = releaseInfo;
                 if (updateActionButton != null) updateActionButton.setEnabled(true);
-                if (releaseInfo != null && releaseInfo.hasUpdate) {
+                String currentVer = AodReleaseInfo.getInstalledVersionName(SettingsActivity.this);
+                int currentCode = AodReleaseInfo.getInstalledVersionCode(SettingsActivity.this);
+                boolean reallyHasUpdate = releaseInfo != null && releaseInfo.hasUpdate
+                        && AppUpdater.isNewerVersion(currentVer, currentCode, releaseInfo.tagName, releaseInfo.changelog);
+
+                if (reallyHasUpdate) {
                     if (updateStatusText != null) {
                         updateStatusText.setText("Update available: " + releaseInfo.tagName);
                         updateStatusText.setTextColor(SettingsUiTheme.COLOR_ACCENT);
@@ -1173,8 +1229,9 @@ public final class SettingsActivity extends Activity implements SensorEventListe
                         Toast.makeText(SettingsActivity.this, "New version found: " + releaseInfo.tagName, Toast.LENGTH_SHORT).show();
                     }
                 } else {
+                    pendingRestartSystemUi = false;
                     if (updateStatusText != null) {
-                        updateStatusText.setText("Latest version installed (" + AodReleaseInfo.VERSION_NAME + ")");
+                        updateStatusText.setText("Latest version installed (" + currentVer + ")");
                         updateStatusText.setTextColor(SettingsUiTheme.COLOR_TEXT);
                     }
                     if (updateDetailsText != null) {
@@ -1196,8 +1253,9 @@ public final class SettingsActivity extends Activity implements SensorEventListe
                     updateActionButton.setEnabled(true);
                     updateActionButton.setText("Check for updates");
                 }
+                String currentVer = AodReleaseInfo.getInstalledVersionName(SettingsActivity.this);
                 if (updateStatusText != null) {
-                    updateStatusText.setText("Version " + AodReleaseInfo.VERSION_NAME + " (check failed)");
+                    updateStatusText.setText("Version " + currentVer + " (check failed)");
                     updateStatusText.setTextColor(SettingsUiTheme.COLOR_MUTED);
                 }
                 if (manual) {
@@ -1228,22 +1286,28 @@ public final class SettingsActivity extends Activity implements SensorEventListe
             @Override
             public void onDownloaded(File apkFile) {
                 if (updateProgressBar != null) updateProgressBar.setVisibility(View.GONE);
-                if (updateStatusText != null) updateStatusText.setText("Installing update...");
+                if (updateStatusText != null) updateStatusText.setText("Installing update via Root...");
 
                 // Try silent root install first
                 boolean rootSuccess = AppUpdater.installApkWithRoot(SettingsActivity.this, apkFile);
                 if (rootSuccess) {
-                    Toast.makeText(SettingsActivity.this, "Updated successfully! Restarting...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(SettingsActivity.this, "Updated to " + release.tagName + " & SystemUI restarted!", Toast.LENGTH_LONG).show();
                     if (updateActionButton != null) {
                         updateActionButton.setEnabled(true);
                         updateActionButton.setText("Updated!");
                     }
                     recreate();
                 } else {
-                    // Standard package installer intent
+                    // Standard package installer intent fallback
+                    pendingRestartSystemUi = true;
                     if (updateActionButton != null) {
                         updateActionButton.setEnabled(true);
-                        updateActionButton.setText("Install downloaded APK");
+                        updateActionButton.setText("⚡ Restart SystemUI");
+                        SettingsUiTheme.stylePrimaryButton(updateActionButton, density());
+                    }
+                    if (updateStatusText != null) {
+                        updateStatusText.setText("Installer opened. After installing, tap 'Restart SystemUI' to apply.");
+                        updateStatusText.setTextColor(SettingsUiTheme.COLOR_ACCENT);
                     }
                     AppUpdater.startSystemInstall(SettingsActivity.this, apkFile);
                 }

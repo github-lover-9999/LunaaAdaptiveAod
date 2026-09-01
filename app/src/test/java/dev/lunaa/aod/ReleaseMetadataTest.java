@@ -11,10 +11,14 @@ public class ReleaseMetadataTest {
         String buildScript = read("tools/build-windows.ps1");
         String readme = read("README.md");
 
+        String releaseInfo = read("app/src/main/java/dev/lunaa/aod/AodReleaseInfo.java");
+
         assertTrue(gradle.contains("versionCode = 16700"));
         assertTrue(gradle.contains("versionName = \"1.6.7\""));
         assertTrue(buildScript.contains("LunaaAdaptiveAod-v1.6.7-build.apk"));
         assertTrue(readme.contains("Lunaa Adaptive AOD"));
+        assertTrue(releaseInfo.contains("VERSION_NAME = \"1.6.7\""));
+        assertTrue(releaseInfo.contains("VERSION_CODE = 16700"));
     }
 
     @Test

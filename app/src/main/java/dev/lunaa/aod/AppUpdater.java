@@ -78,7 +78,9 @@ public final class AppUpdater {
                         return;
                     }
 
-                    final ReleaseInfo releaseInfo = parseReleaseJson(jsonStr, AodReleaseInfo.VERSION_NAME, AodReleaseInfo.VERSION_CODE);
+                    String currentVersion = AodReleaseInfo.getInstalledVersionName(context);
+                    int currentCode = AodReleaseInfo.getInstalledVersionCode(context);
+                    final ReleaseInfo releaseInfo = parseReleaseJson(jsonStr, currentVersion, currentCode);
                     postToMain(new Runnable() {
                         @Override
                         public void run() {
@@ -343,13 +345,22 @@ public final class AppUpdater {
         try {
             android.content.pm.PackageManager pm = context.getPackageManager();
             if (pm == null) return false;
-            android.content.pm.PackageInfo archiveInfo;
+            android.content.pm.PackageInfo archiveInfo = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                archiveInfo = pm.getPackageArchiveInfo(apkFile.getAbsolutePath(), android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES);
-            } else {
-                archiveInfo = pm.getPackageArchiveInfo(apkFile.getAbsolutePath(), android.content.pm.PackageManager.GET_SIGNATURES);
+                try {
+                    archiveInfo = pm.getPackageArchiveInfo(apkFile.getAbsolutePath(), android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES);
+                } catch (Throwable ignored) {}
             }
             if (archiveInfo == null || archiveInfo.packageName == null) {
+                try {
+                    archiveInfo = pm.getPackageArchiveInfo(apkFile.getAbsolutePath(), android.content.pm.PackageManager.GET_SIGNATURES);
+                } catch (Throwable ignored) {}
+            }
+            if (archiveInfo == null || archiveInfo.packageName == null) {
+                archiveInfo = pm.getPackageArchiveInfo(apkFile.getAbsolutePath(), 0);
+            }
+            if (archiveInfo == null || archiveInfo.packageName == null) {
+                Log.e(TAG, "Failed to parse APK archive metadata: " + apkFile.getAbsolutePath());
                 return false;
             }
             if (!context.getPackageName().equals(archiveInfo.packageName)) {
@@ -357,27 +368,40 @@ public final class AppUpdater {
                 return false;
             }
 
-            android.content.pm.PackageInfo currentInfo;
+            android.content.pm.PackageInfo currentInfo = null;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                currentInfo = pm.getPackageInfo(context.getPackageName(), android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES);
-                if (archiveInfo.signingInfo != null && currentInfo.signingInfo != null) {
-                    android.content.pm.Signature[] archiveSigs = archiveInfo.signingInfo.getApkContentsSigners();
-                    android.content.pm.Signature[] currentSigs = currentInfo.signingInfo.getApkContentsSigners();
-                    if (archiveSigs != null && currentSigs != null && archiveSigs.length > 0 && currentSigs.length > 0) {
-                        return archiveSigs[0].equals(currentSigs[0]);
+                try {
+                    currentInfo = pm.getPackageInfo(context.getPackageName(), android.content.pm.PackageManager.GET_SIGNING_CERTIFICATES);
+                    if (archiveInfo.signingInfo != null && currentInfo != null && currentInfo.signingInfo != null) {
+                        android.content.pm.Signature[] archiveSigs = archiveInfo.signingInfo.getApkContentsSigners();
+                        android.content.pm.Signature[] currentSigs = currentInfo.signingInfo.getApkContentsSigners();
+                        if (archiveSigs != null && currentSigs != null && archiveSigs.length > 0 && currentSigs.length > 0) {
+                            return archiveSigs[0].equals(currentSigs[0]);
+                        }
+                    }
+                } catch (Throwable ignored) {}
+            }
+            try {
+                if (archiveInfo.signatures != null && archiveInfo.signatures.length > 0) {
+                    if (currentInfo == null || currentInfo.signatures == null) {
+                        currentInfo = pm.getPackageInfo(context.getPackageName(), android.content.pm.PackageManager.GET_SIGNATURES);
+                    }
+                    if (currentInfo != null && currentInfo.signatures != null && currentInfo.signatures.length > 0) {
+                        return archiveSigsMatch(archiveInfo.signatures, currentInfo.signatures);
                     }
                 }
-            } else {
-                currentInfo = pm.getPackageInfo(context.getPackageName(), android.content.pm.PackageManager.GET_SIGNATURES);
-                if (archiveInfo.signatures != null && currentInfo.signatures != null && archiveInfo.signatures.length > 0 && currentInfo.signatures.length > 0) {
-                    return archiveInfo.signatures[0].equals(currentInfo.signatures[0]);
-                }
-            }
+            } catch (Throwable ignored) {}
+
             return true;
         } catch (Throwable t) {
             Log.e(TAG, "Failed to verify downloaded APK", t);
             return false;
         }
+    }
+
+    private static boolean archiveSigsMatch(android.content.pm.Signature[] a, android.content.pm.Signature[] b) {
+        if (a == null || b == null || a.length == 0 || b.length == 0) return false;
+        return a[0].equals(b[0]);
     }
 
     public static boolean installApkWithRoot(Context context, File apkFile) {
@@ -388,14 +412,40 @@ public final class AppUpdater {
         }
         try {
             String apkPath = apkFile.getAbsolutePath();
-            String command = "pm install -r \"" + apkPath + "\" && (killall com.android.systemui || true)";
+            String stagedPath = "/data/local/tmp/lunaa_update.apk";
+            String command = "cp \"" + apkPath + "\" \"" + stagedPath + "\" && "
+                    + "chmod 644 \"" + stagedPath + "\" && "
+                    + "pm install -r -d \"" + stagedPath + "\" && "
+                    + "rm -f \"" + stagedPath + "\" && "
+                    + "(killall com.android.systemui || true)";
 
             Process process = Runtime.getRuntime().exec(new String[]{"su", "-c", command});
+            BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+            StringBuilder output = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                output.append(line).append('\n');
+            }
+            reader.close();
             int exit = process.waitFor();
-            return exit == 0;
+            String outStr = output.toString();
+            Log.i(TAG, "Root install exit=" + exit + " output=" + outStr.trim());
+            return exit == 0 && outStr.contains("Success");
         } catch (Throwable t) {
             try {
                 Log.w(TAG, "Root install attempt failed; falling back to PackageInstaller", t);
+            } catch (Throwable ignored) {}
+            return false;
+        }
+    }
+
+    public static boolean restartSystemUi() {
+        try {
+            Process process = Runtime.getRuntime().exec(new String[]{"su", "-c", "killall com.android.systemui"});
+            return process.waitFor() == 0;
+        } catch (Throwable t) {
+            try {
+                Log.w(TAG, "Restart SystemUI failed", t);
             } catch (Throwable ignored) {}
             return false;
         }
