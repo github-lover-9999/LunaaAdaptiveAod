@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/latest"><img src="https://img.shields.io/badge/Release-v1.6.7-FFC449.svg?style=for-the-badge&logo=github" alt="Latest Release" /></a>
+  <a href="https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/latest"><img src="https://img.shields.io/github/v/release/github-lover-9999/LunaaAdaptiveAod?style=for-the-badge&logo=github&color=FFC449&label=Latest%20Release" alt="Latest Release" /></a>
   <a href="https://github.com/github-lover-9999/LunaaAdaptiveAod/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/github-lover-9999/LunaaAdaptiveAod/ci.yml?branch=main&style=for-the-badge&logo=githubactions&label=CI%20Build" alt="CI Status" /></a>
   <a href="https://github.com/github-lover-9999/LunaaAdaptiveAod/releases"><img src="https://img.shields.io/badge/Android-8.0_--_16_(API_36)-34D399.svg?style=for-the-badge&logo=android" alt="Android Support" /></a>
   <a href="https://github.com/mywalkb/LSPosed_mod"><img src="https://img.shields.io/badge/Xposed-LSPosed_/_Zygisk--Vector-38BDF8.svg?style=for-the-badge&logo=xposed" alt="LSPosed Support" /></a>
@@ -12,7 +12,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/download/v1.6.7/LunaaAdaptiveAod-v1.6.7-signed.apk"><b>📥 Download Latest APK (v1.6.7)</b></a> •
+  <a href="https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/latest"><b>📥 Download Latest APK</b></a> •
   <a href="#-requirements"><b>📋 Requirements</b></a> •
   <a href="#-how-to-install--use"><b>🚀 How to Install &amp; Use</b></a>
   <br>
@@ -41,7 +41,7 @@
 ## 🚀 How to Install & Use
 
 1. **📥 Download & Install APK**:
-   - Grab the latest signed APK from [Releases](https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/latest) (or directly download [`LunaaAdaptiveAod-v1.6.7-signed.apk`](https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/download/v1.6.7/LunaaAdaptiveAod-v1.6.7-signed.apk)).
+   - Grab the latest signed APK from [Releases](https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/latest).
 2. **⚙️ Enable in LSPosed**:
    - Open **LSPosed Manager** (or Zygisk-Vector).
    - Enable the **Lunaa Adaptive AOD** module.
@@ -151,7 +151,7 @@ On Snapdragon 778G / Samsung AMOLED (AMS643YE01) panels:
 ### 🚀 Пошаговая установка и использование
 
 1. **📥 Установка приложения**:
-   - Скачайте свежий подписанный APK из раздела [Releases](https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/latest) (или напрямую [`LunaaAdaptiveAod-v1.6.7-signed.apk`](https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/download/v1.6.7/LunaaAdaptiveAod-v1.6.7-signed.apk)).
+   - Скачайте свежий подписанный APK из раздела [Releases](https://github.com/github-lover-9999/LunaaAdaptiveAod/releases/latest).
 2. **⚙️ Активация в LSPosed**:
    - Откройте приложение **LSPosed Manager** (или Zygisk-Vector).
    - Включите модуль **Lunaa Adaptive AOD**.

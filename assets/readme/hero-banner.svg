@@ -92,7 +92,7 @@
 
     <!-- Version & Platform Badges -->
     <g transform="translate(0, 260)">
-      <text x="0" y="16" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" font-weight="600" fill="#6E7681">RELEASE: <tspan fill="#34D399">v1.6.5</tspan> (API 26–36)  |  DEVICE: <tspan fill="#FFC449">RMX3363 / lunaa</tspan></text>
+      <text x="0" y="16" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" font-weight="600" fill="#6E7681">TARGET: <tspan fill="#34D399">Android 8.0–16 (API 26–36)</tspan>  |  DEVICE: <tspan fill="#FFC449">RMX3363 / lunaa</tspan></text>
       <text x="0" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" font-weight="600" fill="#6E7681">ENGINE: <tspan fill="#F0F6FC">Stevens' Power Law (0–20k Lux)</tspan>  |  LICENSE: <tspan fill="#F0F6FC">GPL-3.0</tspan></text>
     </g>
   </g>
