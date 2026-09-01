@@ -1131,6 +1131,7 @@ public final class SettingsActivity extends Activity implements SensorEventListe
         card.addView(updateProgressBar, progressParams);
 
         LinearLayout buttonRow = horizontal();
+        buttonRow.setGravity(Gravity.CENTER_VERTICAL);
         updateActionButton = new Button(this);
         updateActionButton.setText("Check for updates");
         SettingsUiTheme.styleButton(updateActionButton, density(), false);
@@ -1151,11 +1152,14 @@ public final class SettingsActivity extends Activity implements SensorEventListe
                 triggerUpdateCheck(true);
             }
         });
-        buttonRow.addView(updateActionButton, weighted());
+        LinearLayout.LayoutParams actionParams = new LinearLayout.LayoutParams(0, dp(48), 1f);
+        actionParams.setMargins(0, 0, dp(8), 0);
+        buttonRow.addView(updateActionButton, actionParams);
 
         restartSystemUiButton = new Button(this);
         restartSystemUiButton.setText("⚡ Restart UI");
-        SettingsUiTheme.styleSecondaryButton(restartSystemUiButton, density());
+        SettingsUiTheme.styleButton(restartSystemUiButton, density(), false);
+        restartSystemUiButton.setPadding(dp(12), dp(8), dp(12), dp(8));
         restartSystemUiButton.setOnClickListener(v -> {
             animateActionButton(v);
             boolean ok = AppUpdater.restartSystemUi();
@@ -1165,7 +1169,10 @@ public final class SettingsActivity extends Activity implements SensorEventListe
                 Toast.makeText(SettingsActivity.this, "Could not restart SystemUI via root", Toast.LENGTH_SHORT).show();
             }
         });
-        buttonRow.addView(restartSystemUiButton, wrap());
+        LinearLayout.LayoutParams restartParams = new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT, dp(48));
+        restartParams.setMargins(0, 0, 0, 0);
+        buttonRow.addView(restartSystemUiButton, restartParams);
 
         LinearLayout.LayoutParams buttonParams = fullWidth();
         buttonParams.setMargins(0, dp(10), 0, 0);

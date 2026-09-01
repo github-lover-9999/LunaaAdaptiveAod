@@ -97,18 +97,17 @@ final class SettingsUiTheme {
     }
 
     static void stylePrimaryButton(Button button, float density) {
-        GradientDrawable background = rounded(COLOR_ACCENT, density, 14f);
+        GradientDrawable background = rounded(COLOR_ACCENT, density, 13f);
         button.setBackground(background);
         button.setTextColor(COLOR_ACCENT_TEXT);
         button.setAllCaps(false);
-        button.setMinHeight(dp(density, 52f));
-        button.setMinimumHeight(dp(density, 52f));
+        button.setMinHeight(dp(density, 48f));
+        button.setMinimumHeight(dp(density, 48f));
+        button.setPadding(dp(density, 10f), dp(density, 8f), dp(density, 10f), dp(density, 8f));
     }
 
     static void styleSecondaryButton(Button button, float density) {
         styleButton(button, density, false);
-        button.setMinHeight(dp(density, 52f));
-        button.setMinimumHeight(dp(density, 52f));
     }
 
     static void styleSeekBar(SeekBar seekBar) {
