@@ -1297,23 +1297,30 @@ public final class SettingsActivity extends Activity implements SensorEventListe
 
                 // Try silent root install first
                 boolean rootSuccess = AppUpdater.installApkWithRoot(SettingsActivity.this, apkFile);
+                pendingRestartSystemUi = true;
                 if (rootSuccess) {
-                    Toast.makeText(SettingsActivity.this, "Updated to " + release.tagName + " & SystemUI restarted!", Toast.LENGTH_LONG).show();
+                    if (updateStatusText != null) {
+                        updateStatusText.setText("Installed " + release.tagName + "! Tap 'Restart UI' to apply changes.");
+                        updateStatusText.setTextColor(SettingsUiTheme.COLOR_ACCENT);
+                    }
                     if (updateActionButton != null) {
                         updateActionButton.setEnabled(true);
-                        updateActionButton.setText("Updated!");
+                        updateActionButton.setText("⚡ Restart UI");
+                        SettingsUiTheme.stylePrimaryButton(updateActionButton, density());
                     }
-                    recreate();
+                    if (restartSystemUiButton != null) {
+                        SettingsUiTheme.stylePrimaryButton(restartSystemUiButton, density());
+                    }
+                    Toast.makeText(SettingsActivity.this, "Installed " + release.tagName + "! Tap 'Restart UI' to apply.", Toast.LENGTH_LONG).show();
                 } else {
                     // Standard package installer intent fallback
-                    pendingRestartSystemUi = true;
                     if (updateActionButton != null) {
                         updateActionButton.setEnabled(true);
-                        updateActionButton.setText("⚡ Restart SystemUI");
+                        updateActionButton.setText("⚡ Restart UI");
                         SettingsUiTheme.stylePrimaryButton(updateActionButton, density());
                     }
                     if (updateStatusText != null) {
-                        updateStatusText.setText("Installer opened. After installing, tap 'Restart SystemUI' to apply.");
+                        updateStatusText.setText("Installer opened. After installing, tap 'Restart UI' to apply.");
                         updateStatusText.setTextColor(SettingsUiTheme.COLOR_ACCENT);
                     }
                     AppUpdater.startSystemInstall(SettingsActivity.this, apkFile);

@@ -416,8 +416,7 @@ public final class AppUpdater {
             String command = "cp \"" + apkPath + "\" \"" + stagedPath + "\" && "
                     + "chmod 644 \"" + stagedPath + "\" && "
                     + "pm install -r -d \"" + stagedPath + "\" && "
-                    + "rm -f \"" + stagedPath + "\" && "
-                    + "(killall com.android.systemui || true)";
+                    + "rm -f \"" + stagedPath + "\"";
 
             Process process = Runtime.getRuntime().exec(new String[]{"su", "-c", command});
             BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
