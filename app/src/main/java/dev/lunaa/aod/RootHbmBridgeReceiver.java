@@ -53,7 +53,12 @@ public final class RootHbmBridgeReceiver extends BroadcastReceiver {
             senderPackage = getSentFromPackage();
         } else {
             senderPackage = SYSTEM_UI;
-            senderUid = 1000;
+            try {
+                senderUid = context.getPackageManager().getPackageUid(SYSTEM_UI, 0);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "Could not resolve SystemUI UID; sender validation will fail");
+                senderUid = -1;
+            }
         }
         PackageManager packageManager = context.getPackageManager();
         String[] packagesForUid = packageManager == null ? null : packageManager.getPackagesForUid(senderUid);

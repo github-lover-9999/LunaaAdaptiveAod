@@ -33,4 +33,24 @@ public class RootBridgeSenderPolicyTest {
                 new String[]{"com.android.systemui"},
                 false));
     }
+
+    @Test
+    public void acceptsSystemUiWithSystemUid1000() {
+        // Edge case: some ROMs may run SystemUI under the system UID.
+        assertTrue(RootBridgeSenderPolicy.isTrusted(
+                1000,
+                "com.android.systemui",
+                new String[]{"com.android.systemui", "android"},
+                true));
+    }
+
+    @Test
+    public void rejectsNegativeUid() {
+        // If PackageManager.getPackageUid() threw NameNotFoundException, senderUid = -1.
+        assertFalse(RootBridgeSenderPolicy.isTrusted(
+                -1,
+                "com.android.systemui",
+                new String[]{"com.android.systemui"},
+                true));
+    }
 }
