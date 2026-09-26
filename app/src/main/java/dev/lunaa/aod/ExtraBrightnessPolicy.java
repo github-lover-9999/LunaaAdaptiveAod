@@ -12,6 +12,16 @@ public final class ExtraBrightnessPolicy {
     private long disableCandidateSinceMs = Long.MIN_VALUE;
 
     public boolean update(long nowMs, float lux, AodSettingsSnapshot settings, boolean ambientActive) {
+        return update(nowMs, lux, Long.MAX_VALUE, settings, ambientActive);
+    }
+
+    /**
+     * @param brightSinceMs since when the light has been at least {@link #ENABLE_LUX}, before AOD
+     *                      too; the enable dwell counts from there. {@link Long#MAX_VALUE} when
+     *                      unknown.
+     */
+    public boolean update(long nowMs, float lux, long brightSinceMs, AodSettingsSnapshot settings,
+            boolean ambientActive) {
         if (!isBaseEligible(settings, ambientActive)) {
             reset();
             return false;
@@ -38,6 +48,7 @@ public final class ExtraBrightnessPolicy {
                 if (enableCandidateSinceMs == Long.MIN_VALUE || nowMs < enableCandidateSinceMs) {
                     enableCandidateSinceMs = nowMs;
                 }
+                enableCandidateSinceMs = Math.min(enableCandidateSinceMs, brightSinceMs);
                 if (nowMs - enableCandidateSinceMs >= ENABLE_DWELL_MS) {
                     desired = true;
                     enableCandidateSinceMs = Long.MIN_VALUE;

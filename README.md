@@ -29,7 +29,7 @@
 | Component | Minimum Requirement | Recommended / Tested Target |
 | :--- | :--- | :--- |
 | **Android OS** | Android 8.0 (Oreo / API 26) | Android 12 – 16 (API 31–36, AOSP / crDroid / Axion OS) |
-| **Framework** | LSPosed / Zygisk-Vector | LSPosed (Zygisk release) with `SystemUI` scope enabled |
+| **Framework** | LSPosed / Zygisk-Vector | LSPosed (Zygisk release) with `System Framework` and `SystemUI` scope enabled |
 | **Root Access** | KernelSU, Magisk, or APatch | KernelSU 3.x or Magisk (required for Hardware HBM &amp; 1-click silent updates) |
 | **Display Panel** | AMOLED Display | **Realme GT Master Edition** (`RMX3363` / `lunaa`, Snapdragon 778G, Samsung AMOLED `AMS643YE01`) |
 
@@ -45,8 +45,8 @@
 2. **⚙️ Enable in LSPosed**:
    - Open **LSPosed Manager** (or Zygisk-Vector).
    - Enable the **Lunaa Adaptive AOD** module.
-   - Ensure **System Framework** / **SystemUI** (`com.android.systemui`) is checked in the module's scope.
-   - Reboot your phone (recommended for initial LSPosed injection).
+   - Check both **System Framework** (`android`) and **System UI** (`com.android.systemui`) in the module's scope. System UI sets the AOD brightness; System Framework makes each AOD brightness change land at once (without it the ROM stretches every change over up to 3 seconds).
+   - Reboot your phone (required after changing the scope).
 3. **🎛️ Configure & Save**:
    - Open **Lunaa Adaptive AOD** from your launcher.
    - Grant **Root access** when prompted (required for Extra Bright HBM and 1-click updates).
@@ -60,6 +60,7 @@
 - 🌓 **Truly Adaptive AOD Brightness**: Real-time ambient light sensor curve matching human perceptual brightness (Stevens' power law). Never too dim in room light, never blinding in a pitch-black room.
 - 🔥 **Hardware AOD-HBM (Extra Bright)**: Direct panel hardware latching (~800 nits) under intense outdoor sunlight (>1500 lux) or on demand in manual mode.
 - 🔓 **Full Optical UDFPS Compatibility**: Instant background logical rearm of `/sys/kernel/oplus_display/notify_fppress` so the optical in-display fingerprint sensor never gets blocked or frozen while HBM is active.
+- 🔋 **Keep AOD on in Battery Saver** (optional): Battery Saver no longer turns AOD off; its other limits stay.
 - 🛡️ **Axion OS & Multi-ROM Safety**: Hardware capability probe (`HbmCapabilityProbe`) with graceful fallback to standard AOSP ambient doze controls on non-Oplus firmware.
 - 🔄 **In-App GitHub Auto-Updater**: Real-time release check directly from GitHub with 1-click seamless silent update via Root (KernelSU / Magisk) or standard Android package installer.
 
@@ -72,15 +73,16 @@
 </p>
 
 ### 1. Automatic Mode (3 Calibrated Presets)
+Percentages are shares of the brightest normal (non-HBM) AOD brightness, as in Manual mode, so Balanced stays below Bright until the brightest light.
 - **🌙 DIM (Night Clock)**: `20% – 40%` (~15–35 nits) — soft, zero-glare, ideal for dark rooms and bedside tables.
 - **⚡ BALANCED (Everyday Recommended)**: `50% – 76%` (~45–135 nits, up to 100% on 20,000 lux) — 50% comfortable floor in darkness scaling smoothly in indoor lighting.
 - **☀️ BRIGHT (Daylight Mode)**: `100%` (215–380 nits) — maximum daytime visibility on standard AOD curve; automatically activates Extra Bright HBM outdoors.
 
 ### 2. Manual Mode (Fixed 3-Step Slider)
-- Allows setting fixed brightness levels without ambient sensor adaptation:
-  - **Dim**: Default 10% (customizable in Advanced Settings).
-  - **Balanced**: Default 50% (customizable in Advanced Settings).
-  - **Bright**: Default 100% (customizable in Advanced Settings, supports Extra Bright toggle).
+- Allows setting fixed brightness levels without ambient sensor adaptation. The percentages are shares of the brightest normal (non-HBM) AOD brightness: on lunaa AOD shows nothing brighter than the HBM transition point (0.735 of the brightness range, backlight 2047 of 2784), so 100% is that level. In AOD the panel runs in its low-power mode, so the same level looks much dimmer than on the normal screen.
+  - **Dim**: Default 25% (customizable in Advanced Settings).
+  - **Balanced**: Default 55% (customizable in Advanced Settings).
+  - **Bright**: Default 100% (customizable in Advanced Settings, supports Extra Bright toggle). Brighter than that is only possible with Extra Bright.
 
 ---
 
@@ -107,6 +109,16 @@ On many custom ROMs, forcing HBM locks up the optical fingerprint scanner. Lunaa
 
 ---
 
+## 🔋 Keep AOD on in Battery Saver
+
+Android's Battery Saver turns AOD off (policy entry `disable_aod`). With **Keep AOD on in Battery Saver** switched on (its own card in the app, off by default), AOD stays on while Battery Saver keeps all its other limits.
+
+- Needs **System Framework** in the module scope.
+- SystemUI asks about AOD each time Battery Saver turns on or off, so the option applies the next time Battery Saver turns on. If Battery Saver is already on, turn it off and on again.
+- The option does not depend on the AOD brightness switch, and it does not turn AOD on: enable AOD in the phone's settings.
+
+---
+
 ## 🛠️ Architecture & How It Works
 
 <p align="center">
@@ -119,7 +131,14 @@ Standard AOSP `DozeScreenBrightness` locks ambient brightness to a fixed, dim le
 - Dynamically resolves runtime fields (`mSensorManager`, `mDisplayManager`, `mHandler`).
 - Employs dual-type reflection bridge (`DozeBridge.java`) supporting both `float` (0.0–1.0, modern AOSP) and legacy `int` (0–255, custom vendor ROMs) `setDozeScreenBrightness` signatures.
 
-### 2. Optical UDFPS & Hardware HBM Bridge (`RootHbmBridgeReceiver.java`)
+### 2. System Framework Hook (`SystemServerHooks.java`)
+lunaa's display config ramps every brightness change at 0.06 per second (perceived scale) for up to 3 seconds, which made each AOD change a slow, stepped rise.
+- Hooks `DisplayPowerController.animateScreenBrightness` in `system_server`.
+- While the display power policy is doze and the module is on, the ramp rate becomes 0, so the change lands at once. The normal screen and unlock keep the stock ramp.
+- Leaves a timestamp in `Settings.Global` (`lunaa_aod_instant_doze_ramp`) so SystemUI knows Extra Bright need not wait for a ramp. Without the System Framework scope everything else still works and Extra Bright waits for the ramp.
+- `BatterySaverAodHook`: with **Keep AOD on in Battery Saver** on, the AOD answer of `BatterySaverPolicy.getBatterySaverPolicy` (`PowerManager.ServiceType.AOD`) no longer blocks AOD. The rest of the answer and every other Battery Saver limit stay unchanged. Nothing is written to the system settings, so switching the option off restores the stock policy.
+
+### 3. Optical UDFPS & Hardware HBM Bridge (`RootHbmBridgeReceiver.java`)
 On Snapdragon 778G / Samsung AMOLED (AMS643YE01) panels:
 - Writing `1` to `/sys/kernel/oplus_display/notify_fppress` latches hardware High Brightness Mode (HBM).
 - The root daemon securely accepts commands strictly from `com.android.systemui` and immediately executes a logical reset (`0`) in background.
@@ -139,7 +158,7 @@ On Snapdragon 778G / Samsung AMOLED (AMS643YE01) panels:
 | Компонент | Минимальные требования | Рекомендуемая конфигурация |
 | :--- | :--- | :--- |
 | **ОС Android** | Android 8.0 (Oreo / API 26) | Android 12 – 16 (API 31–36, AOSP / crDroid / Axion OS) |
-| **Xposed фреймворк** | LSPosed / Zygisk-Vector | LSPosed (Zygisk релиз) с включенным скоупом `SystemUI` |
+| **Xposed фреймворк** | LSPosed / Zygisk-Vector | LSPosed (Zygisk релиз) с включенными скоупами `Системный фреймворк` и `SystemUI` |
 | **Root-доступ** | KernelSU, Magisk или APatch | KernelSU 3.x или Magisk (нужен для HBM и автообновлений) |
 | **Дисплей** | AMOLED экран | **Realme GT Master Edition** (`RMX3363` / `lunaa`, Snapdragon 778G, Samsung AMOLED `AMS643YE01`) |
 
@@ -155,8 +174,8 @@ On Snapdragon 778G / Samsung AMOLED (AMS643YE01) panels:
 2. **⚙️ Активация в LSPosed**:
    - Откройте приложение **LSPosed Manager** (или Zygisk-Vector).
    - Включите модуль **Lunaa Adaptive AOD**.
-   - Убедитесь, что в списке приложений для модуля отмечен **Системный интерфейс (SystemUI / `com.android.systemui`)**.
-   - Перезагрузите смартфон для применения внедрения хуков.
+   - Отметьте в списке приложений для модуля **Системный фреймворк** (`android`) и **Системный интерфейс** (`com.android.systemui`). Системный интерфейс задаёт яркость AOD, а системный фреймворк делает так, чтобы каждое изменение яркости применялось сразу (без него прошивка растягивает каждое изменение до 3 секунд).
+   - Перезагрузите смартфон (обязательно после изменения списка).
 3. **🎛️ Настройка и сохранение**:
    - Запустите **Lunaa Adaptive AOD** с рабочего стола.
    - Предоставьте **Root-права** при появлении системного запроса (необходимы для Extra Bright HBM и автообновления).
@@ -169,6 +188,7 @@ On Snapdragon 778G / Samsung AMOLED (AMS643YE01) panels:
 
 - 🌓 **Плавная адаптивная яркость**: Экран AOD в реальном времени подстраивается под данные датчика света по психофизическому закону Стивенса. Он не слепит глаза в темноте и отлично читается при обычном комнатном освещении.
 - 🔥 **Аппаратный Extra Bright (AOD-HBM)**: Принудительный аппаратный перевод AMOLED-панели в пиковую яркость (~800 нит) на открытом солнце (>1500 люкс) или вручную.
+- 🔋 **AOD при экономии заряда** (по желанию): режим энергосбережения больше не выключает AOD, остальные его ограничения остаются.
 - 🔓 **Полная совместимость с оптическим сканером (UDFPS)**: Фоновый логический сброс `/sys/kernel/oplus_display/notify_fppress` исключает зависание оптического сенсора — разблокировка пальцем остается мгновенной.
 - 🛡️ **Защита для других прошивок (Axion OS / AOSP)**: Аппаратный зонд ядра проверяет наличие интерфейсов и безопасно отключает вызовы драйвера на сторонних устройствах.
 - 🔄 **Встроенное автообновление с GitHub**: Проверка свежих версий прямо в приложении и 1-click тихая установка через Root (KernelSU / Magisk) либо стандартный установщик пакетов.
@@ -177,12 +197,12 @@ On Snapdragon 778G / Samsung AMOLED (AMS643YE01) panels:
 
 ### 🎯 Режимы работы и пресеты яркости
 
-1. **Автоматический режим (3 калиброванных пресета)**:
+1. **Автоматический режим (3 калиброванных пресета)**. Проценты считаются так же, как в ручном режиме: от самой яркой обычной (без HBM) яркости AOD, поэтому Balanced остаётся тусклее Bright вплоть до самого яркого света:
    - **🌙 DIM (Ночной режим)**: `20% – 40%` (~15–35 нит) — мягкий, не отвлекающий ночной циферблат для темных комнат и спальни.
    - **⚡ BALANCED (Повседневный, рекомендуемый)**: `50% – 76%` (~45–135 нит, масштабируется до 100% при 20 000 люкс) — комфортный базовый уровень 50% в темноте с плавным повышением в помещении.
    - **☀️ BRIGHT (Дневной режим)**: `100%` (215–380 нит) — максимальная яркость стандартной кривой AOD с авто-триггером Extra Bright на солнце.
 2. **Ручной режим (Manual Mode)**:
-   - 3 фиксированных положения ползунка: **Dim** (10%), **Balanced** (50%) и **Bright** (100%), точные проценты которых можно настроить в разделе Advanced Settings.
+   - 3 фиксированных положения ползунка: **Dim** (25%), **Balanced** (55%) и **Bright** (100%), точные проценты которых можно настроить в разделе Advanced Settings. Проценты считаются от самой яркой обычной (без HBM) яркости AOD: на lunaa AOD не показывает ничего ярче точки перехода HBM (0.735 диапазона яркости, подсветка 2047 из 2784), поэтому 100% — это она. В AOD панель работает в экономичном режиме, поэтому тот же уровень выглядит заметно тусклее, чем на обычном экране. Ярче только с Extra Bright.
 
 ---
 
@@ -209,13 +229,28 @@ On Snapdragon 778G / Samsung AMOLED (AMS643YE01) panels:
 
 ---
 
+### 🔋 AOD при экономии заряда
+
+Режим энергосбережения Android выключает AOD (параметр `disable_aod`). Если включить **Keep AOD on in Battery Saver** (отдельная карточка в приложении, по умолчанию выключено), AOD остаётся, а все остальные ограничения энергосбережения продолжают работать.
+
+- Нужен скоуп **«Системный фреймворк»**.
+- SystemUI спрашивает про AOD в момент включения или выключения энергосбережения, поэтому опция срабатывает со следующего включения. Если энергосбережение уже включено, выключите и снова включите его.
+- Опция не зависит от переключателя яркости AOD и не включает сам AOD: его нужно включить в настройках телефона.
+
+---
+
 ### 🛠️ Архитектура и внутренняя работа
 
 1. **Внедрение хуков в SystemUI (`SystemUiHooks.java`)**:
    - Перехват состояний засыпания экрана `DozeScreenBrightness` и `transitionTo`.
    - Динамическое разрешение полей через `RuntimeFieldResolver` (`mSensorManager`, `mDisplayManager`, `mHandler`).
    - Мост `DozeBridge.java` для прозрачной поддержки сигнатур как `float` (0.0–1.0, modern AOSP), так и `int` (0–255, вендорные прошивки).
-2. **Root-мост для ядра Oplus (`RootHbmBridgeReceiver.java`)**:
+2. **Хук в системном фреймворке (`SystemServerHooks.java`)**:
+   - Прошивка lunaa растягивает каждое изменение яркости до 3 секунд (0.06 в секунду по шкале восприятия), поэтому AOD разгорался медленно и ступеньками.
+   - Хук `DisplayPowerController.animateScreenBrightness` в `system_server`: пока экран в режиме AOD и модуль включён, изменение яркости применяется сразу. Обычный экран и разблокировка не затронуты.
+   - Метка времени в `Settings.Global` (`lunaa_aod_instant_doze_ramp`) сообщает SystemUI, что Extra Bright можно включать без ожидания. Без скоупа «Системный фреймворк» всё остальное работает, а Extra Bright ждёт окончания плавного перехода.
+   - `BatterySaverAodHook`: при включённой опции ответ `BatterySaverPolicy.getBatterySaverPolicy` для AOD больше не запрещает AOD. Остальные значения и ограничения энергосбережения не меняются, в системные настройки ничего не записывается.
+3. **Root-мост для ядра Oplus (`RootHbmBridgeReceiver.java`)**:
    - Защищенный прием команд строго от UID SystemUI.
    - Аппаратная фиксация HBM и автоматический сброс логического узла сканера отпечатка пальца.
 
@@ -225,3 +260,4 @@ On Snapdragon 778G / Samsung AMOLED (AMS643YE01) panels:
 
 - Developed for the **Realme GT Master Edition** community.
 - Licensed under the [GNU General Public License v3.0](LICENSE).
+- The Battery Saver option follows the approach of [AOD Battery Saver Override](https://github.com/mirsella/aod-battery-saver-override) by mirsella (Apache-2.0).

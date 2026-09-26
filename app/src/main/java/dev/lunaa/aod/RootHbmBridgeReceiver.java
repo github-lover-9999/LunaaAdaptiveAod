@@ -109,8 +109,13 @@ public final class RootHbmBridgeReceiver extends BroadcastReceiver {
                 if (!capability.supported) {
                     detail = capability.reason;
                     Log.w(TAG, "HBM command rejected by capability gate: " + detail);
+                } else if (reset && !COMMAND_GATE.resetNeedsWrite()) {
+                    result = RootHbmBridgeClient.RESULT_SUCCESS;
+                    detail = "already-released";
+                    Log.i(TAG, "FP logical reset skipped: the module holds no press");
                 } else if (reset) {
                     int write = runRootWrite("0");
+                    COMMAND_GATE.recordWrite("0", write == WRITE_OK);
                     if (write == WRITE_OK) {
                         result = RootHbmBridgeClient.RESULT_SUCCESS;
                         detail = "logical-reset";
@@ -120,6 +125,7 @@ public final class RootHbmBridgeReceiver extends BroadcastReceiver {
                     }
                 } else {
                     int resetWrite = runRootWrite("0");
+                    COMMAND_GATE.recordWrite("0", resetWrite == WRITE_OK);
                     if (resetWrite != WRITE_OK) {
                         detail = resetWrite == WRITE_TIMEOUT ? "edge-reset-timeout" : "edge-reset-failed";
                     } else {
@@ -128,6 +134,7 @@ public final class RootHbmBridgeReceiver extends BroadcastReceiver {
                             detail = "superseded-after-reset";
                         } else {
                             int enableWrite = runRootWrite("1");
+                            COMMAND_GATE.recordWrite("1", enableWrite == WRITE_OK);
                             if (enableWrite == WRITE_OK) {
                                 result = RootHbmBridgeClient.RESULT_SUCCESS;
                                 detail = "edge-0-to-1";

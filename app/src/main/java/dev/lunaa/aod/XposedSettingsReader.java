@@ -26,6 +26,15 @@ public final class XposedSettingsReader {
         }
     }
 
+    /** "Keep AOD on in Battery Saver"; read after {@link #reload()}. */
+    public boolean isAodKeptInBatterySaver() {
+        try {
+            return preferences.getBoolean(AodSettingsCodec.KEY_KEEP_AOD_IN_BATTERY_SAVER, false);
+        } catch (Throwable t) {
+            return false;
+        }
+    }
+
     public AodSettingsSnapshot reload() {
         try {
             preferences.reload();

@@ -14,6 +14,8 @@ public final class AodSettingsCodec {
     public static final String KEY_EXTRA_BRIGHT_PERCENT = "extra_bright_percent";
     public static final String KEY_MANUAL_EXTRA_BRIGHT_ENABLED = "manual_extra_bright_enabled";
     public static final String KEY_AUTOMATIC_EXTRA_BRIGHT_ENABLED = "automatic_extra_bright_enabled";
+    /** Keep AOD on while Battery Saver is on (BatterySaverAod); off by default. */
+    public static final String KEY_KEEP_AOD_IN_BATTERY_SAVER = "keep_aod_in_battery_saver";
     public static final String KEY_MANUAL_LEVEL = "manual_level";
     public static final String KEY_EXTRA_BRIGHT_LEVEL = "extra_bright_level";
     public static final String KEY_MANUAL_LEVEL_1_PERCENT = "manual_level_1_percent";
@@ -22,11 +24,19 @@ public final class AodSettingsCodec {
     public static final String KEY_EXTRA_LEVEL_1_PERCENT = "extra_level_1_percent";
     public static final String KEY_EXTRA_LEVEL_2_PERCENT = "extra_level_2_percent";
     public static final String KEY_EXTRA_LEVEL_3_PERCENT = "extra_level_3_percent";
+    /**
+     * Meaning of the stored Manual level percentages. 1: share of the whole brightness range.
+     * 2: share of the brightest normal AOD brightness (AodBrightnessScale).
+     */
+    public static final String KEY_MANUAL_LEVELS_VERSION = "manual_levels_version";
+    public static final int CURRENT_MANUAL_LEVELS_VERSION = 2;
     public static final String KEY_REVISION = "revision";
     public static final String KEY_AUTO_PROFILE_VERSION = "auto_profile_version";
     public static final int CURRENT_AUTO_PROFILE_VERSION = 3;
 
     private static final int MISSING_INT = Integer.MIN_VALUE;
+    /** Version 1 defaults: Balanced and Bright both reached the AOD limit and looked the same. */
+    private static final int[] V1_DEFAULT_MANUAL_LEVELS = {10, 50, 100};
     private static final float TOLERANCE = 0.0005f;
     private static final float[] LEGACY_DIM = {
             0.025f, 0.030f, 0.045f, 0.080f, 0.130f, 0.190f, 0.260f, 0.400f, 0.520f
@@ -88,6 +98,15 @@ public final class AodSettingsCodec {
             boolean hasManualMappings = storedManual1 != MISSING_INT
                     && storedManual2 != MISSING_INT
                     && storedManual3 != MISSING_INT;
+            if (hasManualMappings
+                    && reader.getInt(KEY_MANUAL_LEVELS_VERSION, 1) < CURRENT_MANUAL_LEVELS_VERSION
+                    && storedManual1 == V1_DEFAULT_MANUAL_LEVELS[0]
+                    && storedManual2 == V1_DEFAULT_MANUAL_LEVELS[1]
+                    && storedManual3 == V1_DEFAULT_MANUAL_LEVELS[2]) {
+                storedManual1 = AodSettingsDefaults.DEFAULT_MANUAL_LEVEL_1_PERCENT;
+                storedManual2 = AodSettingsDefaults.DEFAULT_MANUAL_LEVEL_2_PERCENT;
+                storedManual3 = AodSettingsDefaults.DEFAULT_MANUAL_LEVEL_3_PERCENT;
+            }
             int manualLevel1 = hasManualMappings
                     ? storedManual1 : AodSettingsDefaults.DEFAULT_MANUAL_LEVEL_1_PERCENT;
             int manualLevel2 = hasManualMappings
@@ -214,6 +233,7 @@ public final class AodSettingsCodec {
         writer.putInt(KEY_MANUAL_LEVEL_1_PERCENT, snapshot.getManualLevelPercent(1));
         writer.putInt(KEY_MANUAL_LEVEL_2_PERCENT, snapshot.getManualLevelPercent(2));
         writer.putInt(KEY_MANUAL_LEVEL_3_PERCENT, snapshot.getManualLevelPercent(3));
+        writer.putInt(KEY_MANUAL_LEVELS_VERSION, CURRENT_MANUAL_LEVELS_VERSION);
         writer.putInt(KEY_EXTRA_LEVEL_1_PERCENT, snapshot.getExtraBrightLevelPercent(1));
         writer.putInt(KEY_EXTRA_LEVEL_2_PERCENT, snapshot.getExtraBrightLevelPercent(2));
         writer.putInt(KEY_EXTRA_LEVEL_3_PERCENT, snapshot.getExtraBrightLevelPercent(3));

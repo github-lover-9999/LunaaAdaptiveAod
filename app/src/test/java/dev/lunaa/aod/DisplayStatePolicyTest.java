@@ -8,4 +8,12 @@ public class DisplayStatePolicyTest {
         assertFalse(DisplayStatePolicy.isAmbientState(1));
         assertFalse(DisplayStatePolicy.isAmbientState(2));
     }
+
+    @Test public void offAndDozeStatesAreLowPowerButOnAndUnknownAreNot() {
+        assertTrue(DisplayStatePolicy.isLowPowerState(1));
+        assertTrue(DisplayStatePolicy.isLowPowerState(3));
+        assertTrue(DisplayStatePolicy.isLowPowerState(4));
+        assertFalse(DisplayStatePolicy.isLowPowerState(2));
+        assertFalse(DisplayStatePolicy.isLowPowerState(0));
+    }
 }

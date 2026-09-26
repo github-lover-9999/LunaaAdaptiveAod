@@ -1,9 +1,18 @@
 package dev.lunaa.aod;
 
+/**
+ * Decides which light changes reach the AOD brightness. Each one lands in a single step, so it
+ * has to be a real change in the light and a visible change in brightness.
+ */
 public final class UpdateGate {
     static final float MIN_ABS_LUX_DELTA = 10f;
     static final float MIN_RELATIVE_LUX_DELTA = 0.08f;
     static final float MIN_TARGET_DELTA = 0.005f;
+    /**
+     * In the perceived (HLG) scale, about 1% of it: near the top of the range a linear step of
+     * {@link #MIN_TARGET_DELTA} is invisible, and each written step costs a display update.
+     */
+    static final float MIN_PERCEIVED_DELTA = 0.01f;
     static final long FORCE_AFTER_MS = 2000L;
 
     private boolean hasApplied;
@@ -18,7 +27,8 @@ public final class UpdateGate {
         }
 
         float targetDelta = Math.abs(target - lastTarget);
-        if (targetDelta < MIN_TARGET_DELTA) {
+        float perceivedDelta = Math.abs(DozeRamp.hlg(target) - DozeRamp.hlg(lastTarget));
+        if (targetDelta < MIN_TARGET_DELTA || perceivedDelta < MIN_PERCEIVED_DELTA) {
             return false;
         }
 

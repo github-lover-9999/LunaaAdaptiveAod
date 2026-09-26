@@ -3,16 +3,24 @@ package dev.lunaa.aod;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.os.Build;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 
-/** SystemUI-owned full-screen black layer used to tame the physically full AOD-HBM level. */
+/**
+ * SystemUI-owned full-screen black layer used to tame the physically full AOD-HBM level.
+ *
+ * <p>It lies above the lock screen and AOD (notification shade window) and below the UDFPS
+ * overlay (navigation bar panel), so it can stay during a fingerprint touch without dimming what
+ * the overlay shows over the sensor.</p>
+ */
 public final class ExtraBrightnessDimLayer {
     private static final String TAG = "LunaaAOD";
-    static final int TYPE_NAVIGATION_BAR_PANEL = 2024;
+    /** WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY: below TYPE_NAVIGATION_BAR_PANEL (2024). */
+    static final int TYPE_VOLUME_OVERLAY = 2020;
 
     private final Context context;
     private WindowManager windowManager;
@@ -97,11 +105,17 @@ public final class ExtraBrightnessDimLayer {
         layoutParams = new WindowManager.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT,
-                TYPE_NAVIGATION_BAR_PANEL,
+                TYPE_VOLUME_OVERLAY,
                 flags,
                 PixelFormat.TRANSLUCENT
         );
         layoutParams.gravity = Gravity.TOP | Gravity.LEFT;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            // Also over the status bar and the cutout, which the lock screen shows during a pulse.
+            layoutParams.setFitInsetsTypes(0);
+            layoutParams.layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
+        }
         layoutParams.alpha = ExtraBrightnessLevel.overlayAlphaForPercent(ExtraBrightnessLevel.DEFAULT_PERCENT);
         layoutParams.setTitle("Lunaa Extra Bright Dim Layer");
     }

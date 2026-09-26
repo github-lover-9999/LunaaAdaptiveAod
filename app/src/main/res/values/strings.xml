@@ -67,6 +67,10 @@
     <string name="extra_level_medium">Medium</string>
     <string name="extra_level_max">Max</string>
 
+    <string name="battery_saver_title">Battery Saver</string>
+    <string name="battery_saver_keep_aod">Keep AOD on in Battery Saver</string>
+    <string name="battery_saver_help">Battery Saver turns AOD off. With this on, AOD stays and Battery Saver keeps its other limits. Needs System Framework in the module scope. Applies the next time Battery Saver turns on.</string>
+
     <string name="advanced_settings_collapsed">Advanced settings  ▾</string>
     <string name="advanced_settings_expanded">Advanced settings  ▴</string>
     <string name="advanced_settings_help">Set the exact percentage behind each named brightness level. Values must stay between 1 and 100 and increase from left to right.</string>

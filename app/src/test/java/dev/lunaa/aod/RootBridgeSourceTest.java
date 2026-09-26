@@ -23,6 +23,8 @@ public class RootBridgeSourceTest {
         assertTrue(receiver.contains("runRootWrite(\"0\")"));
         assertTrue(receiver.contains("Thread.sleep(EDGE_DELAY_MS)"));
         assertTrue(receiver.contains("runRootWrite(\"1\")"));
+        assertTrue(receiver.contains("COMMAND_GATE.resetNeedsWrite()"));
+        assertTrue(receiver.contains("COMMAND_GATE.recordWrite(\"1\", enableWrite == WRITE_OK)"));
         assertTrue(receiver.contains("TimeUnit.MILLISECONDS"));
         assertFalse(receiver.contains("sleep 0.10"));
         assertTrue(client.contains("setShareIdentityEnabled(true)"));
