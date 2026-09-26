@@ -44,6 +44,49 @@ public class HbmSessionLatchTest {
         assertFalse((Boolean) isLatched.invoke(state));
     }
 
+    @Test
+    public void syntheticPressIsHeldFromTheEdgeUntilOurLogicalResetReleasesIt() {
+        HbmSessionLatch latch = new HbmSessionLatch();
+        assertFalse(latch.isLogicalPressHeld());
+
+        latch.markLatched();
+        assertTrue("0->1 edge leaves the kernel's logical press at 1", latch.isLogicalPressHeld());
+
+        latch.markLogicalPressReleased();
+        assertFalse(latch.isLogicalPressHeld());
+        assertTrue("releasing the logical press keeps the physical HBM latch", latch.isLatched());
+
+        latch.markLatched();
+        assertTrue("a new edge presses again", latch.isLogicalPressHeld());
+
+        latch.clear();
+        assertFalse(latch.isLogicalPressHeld());
+    }
+
+    @Test
+    public void stockResetThatDropsTheLatchAlsoDropsTheHeldPress() {
+        HbmSessionLatch latch = new HbmSessionLatch();
+        latch.markLatched();
+
+        assertTrue(latch.onStockReset());
+        assertFalse(latch.isLogicalPressHeld());
+    }
+
+    @Test
+    public void stockFingerprintOwnsTheNodeFromYieldUntilResumeOrSessionEnd() {
+        HbmSessionLatch latch = new HbmSessionLatch();
+        assertFalse(latch.isYieldedToStockFingerprint());
+
+        latch.yieldToStockFingerprint();
+        assertTrue(latch.isYieldedToStockFingerprint());
+        latch.resumeFromStockFingerprint();
+        assertFalse(latch.isYieldedToStockFingerprint());
+
+        latch.yieldToStockFingerprint();
+        latch.clear();
+        assertFalse("a new AOD session starts owned by the module", latch.isYieldedToStockFingerprint());
+    }
+
     private static Method method(Class<?> type, String name) throws Exception {
         Method method = type.getDeclaredMethod(name);
         method.setAccessible(true);

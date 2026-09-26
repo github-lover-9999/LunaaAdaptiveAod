@@ -18,6 +18,29 @@ public class ExtraBrightnessPolicyTest {
         assertTrue(p.update(1_600, 1_800f, bright, true));
     }
 
+    @Test public void daylightAlreadySeenBeforeAodCountsTowardsTheEnableDwell() {
+        AodSettingsSnapshot bright = snapshot(AodPreset.BRIGHT, 25, 55, 100);
+        ExtraBrightnessPolicy p = new ExtraBrightnessPolicy();
+
+        assertTrue("bright for 4 s already", p.update(4_000, 5_000f, 0L, bright, true));
+    }
+
+    @Test public void daylightThatJustStartedStillWaitsForTheEnableDwell() {
+        AodSettingsSnapshot bright = snapshot(AodPreset.BRIGHT, 25, 55, 100);
+        ExtraBrightnessPolicy p = new ExtraBrightnessPolicy();
+
+        assertFalse(p.update(4_000, 5_000f, 3_800L, bright, true));
+        assertTrue(p.update(4_400, 5_000f, 3_800L, bright, true));
+    }
+
+    @Test public void unknownDaylightStartKeepsTheEnableDwell() {
+        AodSettingsSnapshot bright = snapshot(AodPreset.BRIGHT, 25, 55, 100);
+        ExtraBrightnessPolicy p = new ExtraBrightnessPolicy();
+
+        assertFalse(p.update(4_000, 5_000f, Long.MAX_VALUE, bright, true));
+        assertTrue(p.update(4_600, 5_000f, Long.MAX_VALUE, bright, true));
+    }
+
     @Test public void automaticExtraBrightRequiresBrightDaylightPresetButIgnoresBrightCap() {
         for (AodPreset preset : new AodPreset[]{AodPreset.DIM, AodPreset.BALANCED}) {
             ExtraBrightnessPolicy p = new ExtraBrightnessPolicy();

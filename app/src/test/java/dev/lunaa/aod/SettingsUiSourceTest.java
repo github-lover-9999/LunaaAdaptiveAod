@@ -164,6 +164,36 @@ public class SettingsUiSourceTest {
         assertTrue(store.contains("SecurityException"));
     }
 
+    @Test public void extraBrightStrengthIsDisabledUnlessItsSwitchIsOn() throws Exception {
+        String activity = read("app/src/main/java/dev/lunaa/aod/SettingsActivity.java");
+
+        String helper = block(activity, "private void updateExtraBrightnessStrengthEnabled()");
+        assertTrue(helper.contains("currentMode == AodMode.MANUAL"));
+        assertTrue(helper.contains("manualExtraBrightnessSwitch"));
+        assertTrue(helper.contains("automaticExtraBrightnessSwitch"));
+        assertTrue(helper.contains("extraBrightnessLevelSeekBar.setEnabled(enabled)"));
+        assertTrue(helper.contains("extraBrightnessLevelGroup.setAlpha("));
+
+        assertTrue("switching Extra Bright on or off updates the strength control",
+                block(activity, "automaticExtraBrightnessSwitch.setOnCheckedChangeListener(")
+                        .contains("updateExtraBrightnessStrengthEnabled()"));
+        assertTrue(block(activity, "manualExtraBrightnessSwitch.setOnCheckedChangeListener(")
+                .contains("updateExtraBrightnessStrengthEnabled()"));
+        assertTrue("mode, preset, level and loaded settings update it too",
+                block(activity, "private void updateExtraBrightnessLevelVisibility()")
+                        .contains("updateExtraBrightnessStrengthEnabled()"));
+    }
+
+    /** Source from {@code start} to the end of its first code block. */
+    private static String block(String source, String start) {
+        int from = source.indexOf(start);
+        assertTrue("missing: " + start, from >= 0);
+        int end = source.indexOf("\n    }", from);
+        int lambdaEnd = source.indexOf("});", from);
+        if (lambdaEnd >= 0 && (end < 0 || lambdaEnd < end)) end = lambdaEnd;
+        return source.substring(from, end);
+    }
+
     private static String read(String path) throws Exception {
         return TestProjectFiles.read(path);
     }

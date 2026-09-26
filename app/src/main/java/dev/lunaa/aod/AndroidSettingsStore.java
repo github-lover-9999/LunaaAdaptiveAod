@@ -85,6 +85,19 @@ public final class AndroidSettingsStore {
         return result;
     }
 
+    public boolean loadAodKeptInBatterySaver() {
+        return preferences.getBoolean(AodSettingsCodec.KEY_KEEP_AOD_IN_BATTERY_SAVER, false);
+    }
+
+    public boolean saveAodKeptInBatterySaver(boolean keep) {
+        if (!writableForXposed) return false;
+        boolean result = preferences.edit()
+                .putBoolean(AodSettingsCodec.KEY_KEEP_AOD_IN_BATTERY_SAVER, keep)
+                .commit();
+        makeReadable();
+        return result;
+    }
+
     public boolean save(AodSettingsSnapshot snapshot) {
         if (!writableForXposed || snapshot == null) return false;
         final SharedPreferences.Editor editor = preferences.edit();

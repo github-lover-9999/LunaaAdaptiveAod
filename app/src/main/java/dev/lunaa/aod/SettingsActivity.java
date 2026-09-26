@@ -38,6 +38,7 @@ public final class SettingsActivity extends Activity implements SensorEventListe
     private static final int CONTENT_BOTTOM_PADDING_DP = 24;
     private static final int MANUAL_LEVEL_COUNT = 3;
     private static final int EXTRA_BRIGHT_LEVEL_COUNT = 3;
+    private static final float DISABLED_ALPHA = 0.38f;
 
     private AndroidSettingsStore settingsStore;
     private SensorManager sensorManager;
@@ -67,7 +68,9 @@ public final class SettingsActivity extends Activity implements SensorEventListe
     private LinearLayout extraBrightnessPanel;
     private Switch automaticExtraBrightnessSwitch;
     private Switch manualExtraBrightnessSwitch;
+    private Switch batterySaverAodSwitch;
     private SeekBar extraBrightnessLevelSeekBar;
+    private LinearLayout extraBrightnessLevelGroup;
     private TextView extraBrightnessLevelValue;
 
     private Button advancedSettingsToggle;
@@ -210,6 +213,8 @@ public final class SettingsActivity extends Activity implements SensorEventListe
 
         extraBrightnessPanel = buildExtraBrightnessPanel();
         root.addView(extraBrightnessPanel, spacedFullWidth());
+
+        root.addView(buildBatterySaverCard(), spacedFullWidth());
 
         root.addView(buildAdvancedSettingsPanel(), spacedFullWidth());
         root.addView(buildUpdateCard(), spacedFullWidth());
@@ -433,6 +438,7 @@ public final class SettingsActivity extends Activity implements SensorEventListe
         ((TextView) automaticExtraBrightnessSwitch).setText("Enable Extra Bright (HBM)");
         SettingsUiTheme.styleSwitch(automaticExtraBrightnessSwitch);
         automaticExtraBrightnessSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            updateExtraBrightnessStrengthEnabled();
             if (updatingForm) return;
             updatePreview();
         });
@@ -444,12 +450,17 @@ public final class SettingsActivity extends Activity implements SensorEventListe
         ((TextView) manualExtraBrightnessSwitch).setText("Enable Extra Bright");
         SettingsUiTheme.styleSwitch(manualExtraBrightnessSwitch);
         manualExtraBrightnessSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            updateExtraBrightnessStrengthEnabled();
             if (updatingForm) return;
             updatePreview();
         });
         LinearLayout.LayoutParams manualExtraParams = fullWidth();
         manualExtraParams.setMargins(0, 0, 0, dp(10));
         panel.addView(manualExtraBrightnessSwitch, manualExtraParams);
+
+        extraBrightnessLevelGroup = new LinearLayout(this);
+        extraBrightnessLevelGroup.setOrientation(LinearLayout.VERTICAL);
+        panel.addView(extraBrightnessLevelGroup, fullWidth());
 
         LinearLayout header = horizontal();
         TextView title = text(getString(R.string.extra_bright_level), 15f, true, false);
@@ -458,7 +469,7 @@ public final class SettingsActivity extends Activity implements SensorEventListe
         extraBrightnessLevelValue = text(extraLevelName(2), 22f, true, false);
         extraBrightnessLevelValue.setGravity(Gravity.END | Gravity.CENTER_VERTICAL);
         header.addView(extraBrightnessLevelValue, wrap());
-        panel.addView(header, fullWidth());
+        extraBrightnessLevelGroup.addView(header, fullWidth());
 
         extraBrightnessLevelSeekBar = new SeekBar(this);
         extraBrightnessLevelSeekBar.setMax(EXTRA_BRIGHT_LEVEL_COUNT - 1);
@@ -475,14 +486,29 @@ public final class SettingsActivity extends Activity implements SensorEventListe
             @Override public void onStartTrackingTouch(SeekBar seekBar) {}
             @Override public void onStopTrackingTouch(SeekBar seekBar) {}
         });
-        panel.addView(extraBrightnessLevelSeekBar, new LinearLayout.LayoutParams(
+        extraBrightnessLevelGroup.addView(extraBrightnessLevelSeekBar, new LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT, dp(48)));
-        panel.addView(buildExtraLevelScale(), fullWidth());
+        extraBrightnessLevelGroup.addView(buildExtraLevelScale(), fullWidth());
 
         TextView range = text(getString(R.string.extra_bright_level_range), 12f, false, true);
         range.setPadding(0, dp(4), 0, 0);
-        panel.addView(range);
+        extraBrightnessLevelGroup.addView(range);
         return panel;
+    }
+
+    /** Keep AOD on in Battery Saver: its own switch, independent of the brightness control. */
+    private View buildBatterySaverCard() {
+        LinearLayout card = card();
+        card.addView(cardTitle(getString(R.string.battery_saver_title)));
+        TextView help = text(getString(R.string.battery_saver_help), 13f, false, true);
+        help.setPadding(0, dp(3), 0, dp(10));
+        card.addView(help);
+
+        batterySaverAodSwitch = new Switch(this);
+        batterySaverAodSwitch.setText(R.string.battery_saver_keep_aod);
+        SettingsUiTheme.styleSwitch(batterySaverAodSwitch);
+        card.addView(batterySaverAodSwitch, fullWidth());
+        return card;
     }
 
     private View buildAdvancedSettingsPanel() {
@@ -613,6 +639,9 @@ public final class SettingsActivity extends Activity implements SensorEventListe
             if (automaticExtraBrightnessSwitch != null) {
                 automaticExtraBrightnessSwitch.setChecked(true);
             }
+            if (batterySaverAodSwitch != null) {
+                batterySaverAodSwitch.setChecked(false);
+            }
             currentRevision = persistedRevision;
             statusValue.setText(R.string.reset_not_saved);
             showToast(R.string.reset_not_saved);
@@ -680,6 +709,7 @@ public final class SettingsActivity extends Activity implements SensorEventListe
             }
             manualBrightnessSeekBar.setProgress(snapshot.getManualLevel() - 1);
             automaticExtraBrightnessSwitch.setChecked(settingsStore.loadAutomaticExtraBrightnessEnabled());
+            batterySaverAodSwitch.setChecked(settingsStore.loadAodKeptInBatterySaver());
             manualExtraBrightnessSwitch.setChecked(snapshot.isManualExtraBrightEnabled());
             extraBrightnessLevelSeekBar.setProgress(snapshot.getExtraBrightLevel() - 1);
             syncAdvancedFieldsFromState();
@@ -730,7 +760,9 @@ public final class SettingsActivity extends Activity implements SensorEventListe
         AodSettingsSnapshot draft = readDraft(currentRevision + 1);
         boolean automaticExtraSaved = settingsStore.saveAutomaticExtraBrightnessEnabled(
                 automaticExtraBrightnessSwitch == null || automaticExtraBrightnessSwitch.isChecked());
-        if (automaticExtraSaved && settingsStore.save(draft)) {
+        boolean batterySaverSaved = settingsStore.saveAodKeptInBatterySaver(
+                batterySaverAodSwitch != null && batterySaverAodSwitch.isChecked());
+        if (automaticExtraSaved && batterySaverSaved && settingsStore.save(draft)) {
             currentRevision = draft.getRevision();
             savedFormSignature = formSignature();
             statusValue.setText(R.string.save_success);
@@ -876,6 +908,18 @@ public final class SettingsActivity extends Activity implements SensorEventListe
             ((TextView) manualExtraBrightnessSwitch).setVisibility(
                     visible && currentMode == AodMode.MANUAL ? View.VISIBLE : View.GONE);
         }
+        updateExtraBrightnessStrengthEnabled();
+    }
+
+    /** Low / Medium / Max only apply while the Extra Bright switch of the current mode is on. */
+    private void updateExtraBrightnessStrengthEnabled() {
+        if (extraBrightnessLevelSeekBar == null || extraBrightnessLevelGroup == null) return;
+        Switch toggle = currentMode == AodMode.MANUAL
+                ? manualExtraBrightnessSwitch
+                : automaticExtraBrightnessSwitch;
+        boolean enabled = toggle != null && toggle.isChecked();
+        extraBrightnessLevelSeekBar.setEnabled(enabled);
+        extraBrightnessLevelGroup.setAlpha(enabled ? 1f : DISABLED_ALPHA);
     }
 
     private boolean shouldShowExtraBrightness() {
@@ -991,6 +1035,7 @@ public final class SettingsActivity extends Activity implements SensorEventListe
                 .append(manualBrightnessSeekBar.getProgress()).append('|')
                 .append(manualExtraBrightnessSwitch != null && manualExtraBrightnessSwitch.isChecked()).append('|')
                 .append(automaticExtraBrightnessSwitch == null || automaticExtraBrightnessSwitch.isChecked()).append('|')
+                .append(batterySaverAodSwitch != null && batterySaverAodSwitch.isChecked()).append('|')
                 .append(extraBrightnessLevelSeekBar.getProgress());
         appendFieldSignature(b, manualLevelFields);
         appendFieldSignature(b, extraLevelFields);

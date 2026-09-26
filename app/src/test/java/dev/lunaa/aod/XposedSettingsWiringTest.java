@@ -6,11 +6,12 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Test;
 
 public class XposedSettingsWiringTest {
-    @Test public void manifestEnablesSharedPrefsWithoutBroadeningScope() throws Exception {
+    @Test public void manifestEnablesSharedPrefsForTheScopedProcesses() throws Exception {
         String manifest = read("app/src/main/AndroidManifest.xml");
         assertTrue(manifest.contains("android:name=\"xposedsharedprefs\""));
         assertTrue(manifest.contains("android:value=\"true\""));
-        assertTrue(manifest.contains("android:name=\"xposedscope\" android:value=\"com.android.systemui\""));
+        assertTrue("the scope list lives in @array/xposed_scope",
+                manifest.contains("android:name=\"xposedscope\" android:resource=\"@array/xposed_scope\""));
         assertFalse(manifest.contains("android:value=\"android\""));
     }
 

@@ -5,6 +5,9 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 public class AdaptiveAodEngineTest {
+    /** lunaa: HBM transition point 0.73527 (backlight 2047 of 2784). */
+    private static final float LUNAA_SCALE = 0.73527f;
+
     @Test public void screenBrightnessSeedsThenLuxTakesOver() {
         AdaptiveAodEngine engine = new AdaptiveAodEngine();
         engine.captureScreenBrightness(0.147f);
@@ -47,6 +50,91 @@ public class AdaptiveAodEngineTest {
         assertTrue(Float.isNaN(engine.onLux(1400, 20000f)));
         assertEquals(0.333f, engine.currentTarget(), 0.0001f);
         assertEquals(0.333f, engine.reapply(), 0.0001f);
+    }
+
+    @Test public void manualLevelsAreAShareOfTheBrightestNormalAodBrightness() {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        AodSettingsSnapshot base = AodSettingsDefaults.balanced();
+        engine.updateSettings(configured(base, true, AodMode.MANUAL, 100, 0.010f, 0.55f));
+        engine.setBrightnessScale(0.5f);
+
+        assertEquals(0.275f, engine.prepareAmbientEntry(1_000L), 0.0001f);
+        assertEquals(0.275f, engine.setAmbientActive(true, 1_100L), 0.0001f);
+        assertEquals(0.275f, engine.reapply(), 0.0001f);
+    }
+
+    @Test public void manualBrightIsTheBrightestNormalAodBrightness() {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        engine.updateSettings(configured(AodSettingsDefaults.balanced(), true, AodMode.MANUAL, 100, 0.010f, 1f));
+        engine.setBrightnessScale(LUNAA_SCALE);
+
+        assertEquals(LUNAA_SCALE, engine.prepareAmbientEntry(1_000L), 0.0001f);
+    }
+
+    @Test public void unknownScaleKeepsTheFullBrightnessRange() {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        engine.updateSettings(configured(AodSettingsDefaults.balanced(), true, AodMode.MANUAL, 100, 0.010f, 0.55f));
+        engine.setBrightnessScale(Float.NaN);
+
+        assertEquals(0.55f, engine.prepareAmbientEntry(1_000L), 0.0001f);
+    }
+
+    @Test public void automaticTargetsAreSharesOfTheBrightestNormalAodBrightness() {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        engine.setBrightnessScale(LUNAA_SCALE);
+        engine.onLux(1_000L, 487f);
+
+        assertEquals(BrightnessCurve.targetForLux(487f) * LUNAA_SCALE,
+                engine.prepareAmbientEntry(1_400L), 0.0001f);
+        assertEquals(BrightnessCurve.targetForLux(487f) * LUNAA_SCALE,
+                engine.setAmbientActive(true, 1_500L), 0.0001f);
+        assertEquals(BrightnessCurve.targetForLux(5_000f) * LUNAA_SCALE,
+                engine.onLux(1_600L, 5_000f), 0.0001f);
+        assertEquals(BrightnessCurve.targetForLux(5_000f) * LUNAA_SCALE, engine.reapply(), 0.0001f);
+    }
+
+    @Test public void automaticEntryFromTheScreenBrightnessIsScaledToo() {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        engine.setBrightnessScale(LUNAA_SCALE);
+        engine.captureScreenBrightness(0.147f);
+
+        assertEquals(BrightnessCurve.initialFromScreenBrightness(0.147f) * LUNAA_SCALE,
+                engine.setAmbientActive(true, 1_000L), 0.0001f);
+    }
+
+    @Test public void lightFromBeforeACoverIsScaledToo() {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        engine.setBrightnessScale(LUNAA_SCALE);
+        engine.setLuxTracking(true, 0L);
+        engine.onLux(1_000L, 300f);
+        engine.setAmbientActive(true, 2_000L);
+        engine.onLux(19_500L, 2f);
+        engine.setSensorsCovered(true, 20_000L);
+
+        assertEquals(BrightnessCurve.targetForLux(300f) * LUNAA_SCALE, engine.reapply(), 0.0001f);
+    }
+
+    @Test public void automaticBalancedStaysBelowBrightUntilTheBrightestLight() {
+        AdaptiveAodEngine balanced = automaticEngine(AodPreset.BALANCED);
+        AdaptiveAodEngine bright = automaticEngine(AodPreset.BRIGHT);
+
+        for (float lux : new float[] {5f, 50f, 487f, 2_000f}) {
+            balanced.onLux(1_000L, lux);
+            bright.onLux(1_000L, lux);
+            float balancedTarget = balanced.prepareAmbientEntry(1_100L);
+            float brightTarget = bright.prepareAmbientEntry(1_100L);
+            assertTrue("lux=" + lux + " balanced=" + balancedTarget + " bright=" + brightTarget,
+                    balancedTarget < brightTarget - 0.01f);
+            assertTrue("never above what AOD can show: " + brightTarget, brightTarget <= LUNAA_SCALE + 0.0001f);
+        }
+    }
+
+    @Test public void scaledAutomaticTargetsKeepTheMinimumBrightness() {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        engine.setBrightnessScale(0.1f);
+        engine.onLux(1_000L, 0f);
+
+        assertTrue(engine.prepareAmbientEntry(1_100L) >= AodSettingsSnapshot.MIN_BRIGHTNESS);
     }
 
     @Test public void firstLargeDarkeningSampleIsGuardedButSecondConsistentSampleApplies() {
@@ -97,6 +185,127 @@ public class AdaptiveAodEngineTest {
         assertTrue(Float.isNaN(engine.reapply()));
     }
 
+    @Test public void luxReadingStaysCurrentWhileTheSensorStaysRegistered() {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        engine.setLuxTracking(true, 0);
+        engine.onLux(1_000, 300f);
+        engine.setAmbientActive(true, 5_000);
+
+        assertEquals("a minute later the light sensor has reported no change, so 300 lux still holds",
+                BrightnessCurve.targetForLux(300f), engine.prepareAmbientEntry(61_000), 0.0001f);
+    }
+
+    @Test public void luxReadingExpiresTenSecondsAfterTheSensorWasUnregistered() {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        engine.setLuxTracking(true, 0);
+        engine.onLux(1_000, 300f);
+        engine.setLuxTracking(false, 30_000);
+
+        assertEquals(BrightnessCurve.targetForLux(300f), engine.prepareAmbientEntry(39_000), 0.0001f);
+        assertEquals(BrightnessCurve.initialFromScreenBrightness(Float.NaN),
+                engine.prepareAmbientEntry(41_000), 0.0001f);
+    }
+
+    @Test public void readingsWhileAodIsPausedByTheProximitySensorAreIgnored() {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        engine.setLuxTracking(true, 0);
+        engine.onLux(1_000, 300f);
+        engine.setAmbientActive(true, 2_000);
+
+        engine.setSensorsCovered(true, 19_000);
+        assertTrue("a hand over the sensor is not the ambient light",
+                Float.isNaN(engine.onLux(20_000, 0f)));
+        assertTrue(Float.isNaN(engine.onLux(21_000, 0f)));
+        engine.setSensorsCovered(false, 24_000);
+
+        assertEquals(BrightnessCurve.targetForLux(300f), engine.reapply(), 0.0001f);
+        assertEquals("back from the pause at the level from before the cover",
+                BrightnessCurve.targetForLux(300f), engine.prepareAmbientEntry(25_000), 0.0001f);
+    }
+
+    @Test public void darkReadingsJustBeforeTheProximityPauseAreDiscardedToo() {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        engine.setLuxTracking(true, 0);
+        engine.onLux(1_000, 300f);
+        engine.setAmbientActive(true, 2_000);
+        // The hand reaches the light sensor a moment before the proximity sensor pauses AOD.
+        assertEquals(BrightnessCurve.targetForLux(0f), engine.onLux(20_000, 0f), 0.0001f);
+        engine.onLux(20_100, 0f);
+        engine.setSensorsCovered(true, 20_300);
+
+        assertEquals(BrightnessCurve.targetForLux(300f), engine.reapply(), 0.0001f);
+        engine.setSensorsCovered(false, 25_000);
+        assertEquals(BrightnessCurve.targetForLux(300f), engine.prepareAmbientEntry(25_000), 0.0001f);
+    }
+
+    @Test public void olderLightChangesBeforeThePauseAreKept() {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        engine.setLuxTracking(true, 0);
+        engine.onLux(1_000, 300f);
+        engine.setAmbientActive(true, 2_000);
+        engine.onLux(10_000, 40f);   // the room got darker well before the pause
+        engine.setSensorsCovered(true, 20_000);
+        engine.setSensorsCovered(false, 25_000);
+
+        assertEquals(BrightnessCurve.targetForLux(40f), engine.prepareAmbientEntry(25_000), 0.0001f);
+    }
+
+    @Test public void firstReadingAfterUncoveringIsUsedAgain() {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        engine.setLuxTracking(true, 0);
+        engine.onLux(1_000, 300f);
+        engine.setAmbientActive(true, 2_000);
+        engine.setSensorsCovered(true, 19_000);
+        engine.onLux(20_000, 0f);
+        engine.setSensorsCovered(false, 25_000);
+
+        assertEquals(BrightnessCurve.targetForLux(800f), engine.onLux(26_000, 800f), 0.0001f);
+    }
+
+    @Test public void extraBrightnessSeesTheLastReadingWhileTheSensorStaysRegistered() {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        engine.setLuxTracking(true, 0);
+        engine.onLux(1_000, 5_000f);
+
+        assertEquals(5_000f, engine.currentLux(120_000, 15_000), 0.1f);
+        engine.setSensorsCovered(true, 120_500);
+        assertTrue("no ambient reading while the sensors are covered",
+                Float.isNaN(engine.currentLux(121_000, 15_000)));
+        engine.setSensorsCovered(false, 122_000);
+
+        engine.setLuxTracking(false, 130_000);
+        assertEquals(5_000f, engine.currentLux(145_000, 15_000), 0.1f);
+        assertTrue(Float.isNaN(engine.currentLux(146_000, 15_000)));
+    }
+
+    @Test public void readingsWithoutTrackingKeepTheOriginalTenSecondRule() {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        engine.onLux(1_000, 300f);
+
+        assertEquals(BrightnessCurve.targetForLux(300f), engine.prepareAmbientEntry(11_000), 0.0001f);
+        assertEquals(BrightnessCurve.initialFromScreenBrightness(Float.NaN),
+                engine.prepareAmbientEntry(11_001), 0.0001f);
+        assertTrue(Float.isNaN(engine.currentLux(16_001, 15_000)));
+    }
+
+    @Test public void brightLightRunStartsAtTheFirstOfTheBrightReadings() {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        engine.onLux(1_000L, 300f);
+        engine.onLux(2_000L, 1_600f);
+        engine.onLux(3_000L, 5_000f);
+
+        assertEquals(2_000L, engine.luxAtLeastSinceMs(1_500f));
+        assertEquals(3_000L, engine.luxAtLeastSinceMs(4_000f));
+        assertEquals(Long.MAX_VALUE, engine.luxAtLeastSinceMs(6_000f));
+
+        engine.onLux(4_000L, 900f);
+        assertEquals("the light dropped below it", Long.MAX_VALUE, engine.luxAtLeastSinceMs(1_500f));
+    }
+
+    @Test public void brightLightRunIsUnknownWithoutReadings() {
+        assertEquals(Long.MAX_VALUE, new AdaptiveAodEngine().luxAtLeastSinceMs(1_500f));
+    }
+
     @Test public void luxObservationPolicyFollowsEnabledAutomaticMode() {
         AdaptiveAodEngine engine = new AdaptiveAodEngine();
         AodSettingsSnapshot base = AodSettingsDefaults.balanced();
@@ -118,6 +327,14 @@ public class AdaptiveAodEngineTest {
         assertFalse(engine.isEnabled());
         assertFalse(engine.shouldObserveLux(true, false));
         assertFalse(engine.shouldObserveLux(false, true));
+    }
+
+    private static AdaptiveAodEngine automaticEngine(AodPreset preset) {
+        AdaptiveAodEngine engine = new AdaptiveAodEngine();
+        engine.updateSettings(AodSettingsDefaults.forPreset(preset));
+        engine.setBrightnessScale(LUNAA_SCALE);
+        assertTrue(engine.isAutomaticMode());
+        return engine;
     }
 
     private static AodSettingsSnapshot configured(

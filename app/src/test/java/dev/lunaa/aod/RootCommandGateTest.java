@@ -20,4 +20,27 @@ public class RootCommandGateTest {
         assertFalse(gate.isCurrent(reset));
         assertTrue(gate.isCurrent(nextEnable));
     }
+
+    @Test
+    public void resetWritesOnlyWhileTheModuleMayHoldItsPress() {
+        RootCommandGate gate = new RootCommandGate();
+        assertTrue("unknown after the process starts", gate.resetNeedsWrite());
+
+        gate.recordWrite("0", true); // an edge began, and a reset superseded it before its 1
+        assertFalse("already released: a 0 now could only cancel a real finger press", gate.resetNeedsWrite());
+
+        gate.recordWrite("1", true);
+        assertTrue(gate.resetNeedsWrite());
+
+        gate.recordWrite("0", true);
+        assertFalse(gate.resetNeedsWrite());
+    }
+
+    @Test
+    public void failedOrTimedOutWriteLeavesThePressUnknown() {
+        RootCommandGate gate = new RootCommandGate();
+        gate.recordWrite("0", true);
+        gate.recordWrite("1", false);
+        assertTrue(gate.resetNeedsWrite());
+    }
 }

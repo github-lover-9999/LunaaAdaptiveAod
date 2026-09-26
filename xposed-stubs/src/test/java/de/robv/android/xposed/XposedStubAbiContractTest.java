@@ -55,6 +55,14 @@ public class XposedStubAbiContractTest {
     }
 
     @Test
+    public void methodHookParamResultMatchesLegacyAbi() throws Exception {
+        Method getResult = XC_MethodHook.MethodHookParam.class.getDeclaredMethod("getResult");
+        assertEquals(Object.class, getResult.getReturnType());
+        Method setResult = XC_MethodHook.MethodHookParam.class.getDeclaredMethod("setResult", Object.class);
+        assertEquals(void.class, setResult.getReturnType());
+    }
+
+    @Test
     public void loadPackageCallbackMatchesLegacyAbi() throws Exception {
         Method callback = IXposedHookLoadPackage.class.getDeclaredMethod(
                 "handleLoadPackage", XC_LoadPackage.LoadPackageParam.class);

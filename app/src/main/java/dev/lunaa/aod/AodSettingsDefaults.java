@@ -3,8 +3,12 @@ package dev.lunaa.aod;
 public final class AodSettingsDefaults {
     public static final float DEFAULT_MINIMUM_AUTO_BRIGHTNESS = 0.010f;
     public static final int DEFAULT_MANUAL_LEVEL = 2;
-    public static final int DEFAULT_MANUAL_LEVEL_1_PERCENT = 10;
-    public static final int DEFAULT_MANUAL_LEVEL_2_PERCENT = 50;
+    /**
+     * Manual levels, in percent of the brightest normal AOD brightness (see AodBrightnessScale):
+     * even steps in perceived brightness, so Dim, Balanced and Bright look clearly different.
+     */
+    public static final int DEFAULT_MANUAL_LEVEL_1_PERCENT = 25;
+    public static final int DEFAULT_MANUAL_LEVEL_2_PERCENT = 55;
     public static final int DEFAULT_MANUAL_LEVEL_3_PERCENT = 100;
     public static final int DEFAULT_EXTRA_BRIGHT_LEVEL = 1;
     public static final int DEFAULT_EXTRA_LEVEL_1_PERCENT = 50;

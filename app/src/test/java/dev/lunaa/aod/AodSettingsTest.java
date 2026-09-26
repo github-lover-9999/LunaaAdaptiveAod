@@ -8,13 +8,13 @@ import java.util.Map;
 import org.junit.Test;
 
 public class AodSettingsTest {
-    @Test public void balancedPresetUsesFixedFullRangeAndFiftyPercentManualDefault() {
+    @Test public void balancedPresetUsesFixedFullRangeAndBalancedManualDefault() {
         AodSettingsSnapshot s = AodSettingsDefaults.balanced();
         assertTrue(s.isEnabled());
         assertEquals(AodMode.AUTOMATIC, s.getMode());
         assertEquals(100, s.getMultiplierPercent());
         assertEquals(0.010f, s.getMinimumAutoBrightness(), 0.0001f);
-        assertEquals(0.500f, s.getManualBrightness(), 0.0001f);
+        assertEquals(0.550f, s.getManualBrightness(), 0.0001f);
         assertEquals(AodPreset.BALANCED, s.getPreset());
         assertEquals(25, s.getDimCapPercent());
         assertEquals(100, s.getBalancedCapPercent());
@@ -55,6 +55,73 @@ public class AodSettingsTest {
         assertTrue(loaded.isManualExtraBrightEnabled());
         assertEquals(2, loaded.getExtraBrightLevel());
         assertEquals(88, loaded.getExtraBrightPercent());
+    }
+
+    @Test public void manualLevelDefaultsAreEvenStepsUpToTheBrightestNormalAod() {
+        assertEquals(25, AodSettingsDefaults.DEFAULT_MANUAL_LEVEL_1_PERCENT);
+        assertEquals(55, AodSettingsDefaults.DEFAULT_MANUAL_LEVEL_2_PERCENT);
+        assertEquals(100, AodSettingsDefaults.DEFAULT_MANUAL_LEVEL_3_PERCENT);
+        AodSettingsSnapshot s = AodSettingsDefaults.balanced();
+        assertEquals(25, s.getManualLevelPercent(1));
+        assertEquals(55, s.getManualLevelPercent(2));
+        assertEquals(100, s.getManualLevelPercent(3));
+    }
+
+    @Test public void savedOldDefaultManualLevelsMoveToTheNewDefaults() {
+        Map<String, Object> values = savedManualLevels(10, 50, 100);
+        values.put(AodSettingsCodec.KEY_MANUAL_LEVEL, 2);
+
+        AodSettingsSnapshot loaded = AodSettingsCodec.readOrDefault(new MapReader(values));
+        assertEquals(25, loaded.getManualLevelPercent(1));
+        assertEquals(55, loaded.getManualLevelPercent(2));
+        assertEquals(100, loaded.getManualLevelPercent(3));
+        assertEquals(2, loaded.getManualLevel());
+        assertEquals(0.55f, loaded.getManualBrightness(), 0.0001f);
+    }
+
+    @Test public void customManualLevelsAreKept() {
+        Map<String, Object> values = savedManualLevels(15, 40, 90);
+        values.put(AodSettingsCodec.KEY_MANUAL_LEVEL, 3);
+
+        AodSettingsSnapshot loaded = AodSettingsCodec.readOrDefault(new MapReader(values));
+        assertEquals(15, loaded.getManualLevelPercent(1));
+        assertEquals(40, loaded.getManualLevelPercent(2));
+        assertEquals(90, loaded.getManualLevelPercent(3));
+    }
+
+    @Test public void oldDefaultValuesSavedWithTheNewMeaningAreKept() {
+        Map<String, Object> values = savedManualLevels(10, 50, 100);
+        values.put(AodSettingsCodec.KEY_MANUAL_LEVEL, 1);
+        values.put(AodSettingsCodec.KEY_MANUAL_LEVELS_VERSION, AodSettingsCodec.CURRENT_MANUAL_LEVELS_VERSION);
+
+        AodSettingsSnapshot loaded = AodSettingsCodec.readOrDefault(new MapReader(values));
+        assertEquals(10, loaded.getManualLevelPercent(1));
+        assertEquals(50, loaded.getManualLevelPercent(2));
+        assertEquals(0.10f, loaded.getManualBrightness(), 0.0001f);
+    }
+
+    @Test public void writeMarksTheManualLevelsWithTheirMeaning() {
+        MapWriter writer = new MapWriter();
+        assertTrue(AodSettingsCodec.write(writer, AodSettingsDefaults.balanced()));
+        assertEquals(AodSettingsCodec.CURRENT_MANUAL_LEVELS_VERSION,
+                writer.values.get(AodSettingsCodec.KEY_MANUAL_LEVELS_VERSION));
+        assertEquals(55, writer.values.get(AodSettingsCodec.KEY_MANUAL_LEVEL_2_PERCENT));
+    }
+
+    private static Map<String, Object> savedManualLevels(int level1, int level2, int level3) {
+        AodSettingsSnapshot base = AodSettingsDefaults.balanced();
+        Map<String, Object> values = new HashMap<>();
+        values.put(AodSettingsCodec.KEY_ENABLED, true);
+        values.put(AodSettingsCodec.KEY_MODE, AodMode.MANUAL.persistedValue());
+        values.put(AodSettingsCodec.KEY_PRESET, AodPreset.BALANCED.persistedValue());
+        values.put(AodSettingsCodec.KEY_MANUAL_LEVEL_1_PERCENT, level1);
+        values.put(AodSettingsCodec.KEY_MANUAL_LEVEL_2_PERCENT, level2);
+        values.put(AodSettingsCodec.KEY_MANUAL_LEVEL_3_PERCENT, level3);
+        for (int i = 0; i < AodSettingsSnapshot.POINT_COUNT; i++) {
+            values.put(AodSettingsCodec.luxKey(i), base.luxAt(i));
+            values.put(AodSettingsCodec.brightnessKey(i), base.brightnessAt(i));
+        }
+        return values;
     }
 
     @Test public void legacyV131PreferencesMigratePresetAndCapsWithoutKeepingOldMultiplier() {
@@ -174,7 +241,7 @@ public class AodSettingsTest {
         assertEquals(AodMode.AUTOMATIC, loaded.getMode());
         assertEquals(100, loaded.getMultiplierPercent());
         assertEquals(0.010f, loaded.getMinimumAutoBrightness(), 0.0001f);
-        assertEquals(0.500f, loaded.getManualBrightness(), 0.0001f);
+        assertEquals(0.550f, loaded.getManualBrightness(), 0.0001f);
         assertEquals(8, loaded.getRevision());
         assertArrayEquals(base.copyLux(), loaded.copyLux(), 0.0001f);
         assertArrayEquals(base.copyBrightness(), loaded.copyBrightness(), 0.0001f);
@@ -229,7 +296,7 @@ public class AodSettingsTest {
         assertEquals(AodMode.AUTOMATIC, loaded.getMode());
         assertEquals(100, loaded.getMultiplierPercent());
         assertEquals(0.010f, loaded.getMinimumAutoBrightness(), 0.0001f);
-        assertEquals(0.500f, loaded.getManualBrightness(), 0.0001f);
+        assertEquals(0.550f, loaded.getManualBrightness(), 0.0001f);
         assertEquals(0, loaded.getRevision());
         assertArrayEquals(balanced.copyLux(), loaded.copyLux(), 0.0001f);
         assertArrayEquals(balanced.copyBrightness(), loaded.copyBrightness(), 0.0001f);

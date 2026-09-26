@@ -37,16 +37,35 @@ public class StartupDipWiringTest {
         assertFalse(resetHook.contains("ensureController("));
     }
 
-    @Test public void controllerAppliesPreparedEntryBeforeStockTransitionAndSmoothsLuxChanges() throws Exception {
+    @Test public void controllerAppliesPreparedEntryAndLightChangesInOneStep() throws Exception {
         String controller = read("AdaptiveAodController.java");
 
-        assertTrue(controller.contains("new BrightnessSmoother()"));
-        assertTrue(controller.contains("brightnessTransitionRunner"));
-        assertTrue(controller.contains("BrightnessSmoother.FRAME_INTERVAL_MS"));
-        assertTrue(controller.contains("applyImmediate(prepared, \"prepare-aod\")"));
-        assertTrue(controller.contains("retargetSmooth(target, \"lux\")"));
-        assertTrue(controller.contains("smoother.valueAt(nowMs)"));
-        assertTrue(controller.contains("stopBrightnessTransition()"));
+        assertTrue(controller.contains("apply(prepared, \"prepare-aod\")"));
+        assertTrue(controller.contains("applyLuxTarget(target)"));
+        assertTrue(controller.contains("apply(target, \"lux\")"));
+        assertFalse("no module-driven fade", controller.contains("BrightnessSmoother"));
+        assertFalse(controller.contains("brightnessTransitionRunner"));
+        assertFalse(controller.contains("retargetSmooth("));
+    }
+
+    @Test public void aodEntryShowsTheTargetInOneStepAndExtraBrightFollowsTheSystemRamp() throws Exception {
+        String controller = read("AdaptiveAodController.java");
+
+        assertTrue(controller.contains("applyEntry(initialTarget)"));
+        assertTrue(controller.contains("apply(target, \"enter-doze\")"));
+        assertTrue(controller.contains("DozeRamp.durationMs(from, target, animatorScale)"));
+        assertTrue(controller.contains("extraBrightnessController.setEntryRampMs(rampMs)"));
+        assertFalse("no module-driven rise", controller.toLowerCase().contains("glide"));
+    }
+
+    @Test public void manualLevelsUseTheBrightestNormalAodBrightnessReadBeforeEachEntry() throws Exception {
+        String controller = read("AdaptiveAodController.java");
+
+        int scale = controller.indexOf("refreshBrightnessScale();\n        float prepared = engine.prepareAmbientEntry(");
+        assertTrue("the scale is read before the prepared target is computed", scale >= 0);
+        assertTrue(controller.contains("\"highBrightnessTransitionPoint\""));
+        assertTrue(controller.contains("\"config_screenBrightnessSettingMaximumFloat\""));
+        assertTrue(controller.contains("engine.setBrightnessScale(scale)"));
     }
 
     @Test public void disabledAndManualPoliciesDoNotKeepAmbientLuxListenerOrWriteStaleTarget() throws Exception {
@@ -58,7 +77,7 @@ public class StartupDipWiringTest {
         assertTrue(controller.contains("return;"));
     }
 
-    @Test public void stockResetReappliesCurrentSmoothedBrightnessWithoutRestartingRamp() throws Exception {
+    @Test public void stockResetReappliesTheCurrentTarget() throws Exception {
         String controller = read("AdaptiveAodController.java");
         int start = controller.indexOf("public void reapplyAfterReset()");
         int end = controller.indexOf("public void destroy()", start);
@@ -68,11 +87,9 @@ public class StartupDipWiringTest {
         String brightnessHelper = controller.substring(brightnessStart, currentStart);
 
         assertTrue(method.contains("reapplyBrightnessTarget(\"after-stock-reset\")"));
-        assertTrue(brightnessHelper.contains("smoother.valueAt(nowMs)"));
-        assertFalse(method.contains("retargetSmooth("));
-        assertFalse(method.contains("smoother.retarget("));
-        assertFalse(brightnessHelper.contains("retargetSmooth("));
-        assertFalse(brightnessHelper.contains("smoother.retarget("));
+        assertTrue(brightnessHelper.contains("engine.reapply()"));
+        assertTrue(brightnessHelper.contains("engine.pendingTarget()"));
+        assertFalse(brightnessHelper.contains("smoother"));
     }
 
     private static String read(String file) throws Exception {
